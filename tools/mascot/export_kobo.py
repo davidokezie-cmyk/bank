@@ -147,7 +147,6 @@ def main():
                 export_nla_strips=False,
                 export_yup=True,  # Convert from Z-up (blender) to Y-up (glTF)
                 export_apply=True,  # Apply modifiers, materials, etc.
-                export_textures=False,  # No image textures - flat colours/procedural only
                 export_empty_as_null=True,
             )
             
