@@ -7,14 +7,13 @@ Features:
 - Lite GLB: public/models/kobo-lite.glb (≤ 8k tris via Decimate)
 - GLB format with modifiers applied, skins, morph targets, all animations
 - +Y up conversion for glTF space
-- No cameras/lights in export
+- No image textures (flat colours/procedural only)
 - Optimisation via gltf-transform afterward
 """
 
 import bpy
 import sys
 import os
-import json
 
 def main():
     """Entry point for Blender pipeline."""
@@ -39,41 +38,59 @@ def main():
     
     print(f"Blender version: {bpy.app.version_string}")
     print(f"Bforartists Koba export pipeline starting...")
-    print(f"Export options: full={'--full' in args}, lite={'--lite' not in args}")
+    print(f"Export options: full={export_full}, lite={export_lite}")
     
     # ============================================================
-    # Ensure we're in object mode and animation data exists
+    # Find and set the active object (Body/Koba_Body)
     # ============================================================
     
-    if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT':
+    target_obj = None
+    if 'Kobo_Body' in bpy.data.objects:
+        target_obj = bpy.data.objects['Kobo_Body']
+    elif 'Body' in bpy.data.objects:
+        target_obj = bpy.data.objects['Body']
+    
+    if target_obj:
+        # Set as active object in view layer
+        for obj in bpy.data.objects:
+            obj.select_set(False)
+        target_obj.select_set(True)
+        bpy.context.view_layer.objects.active = target_obj
+    obj = bpy.context.view_layer.objects.active
+    
+    # Ensure we're in object mode
+    if obj and obj.mode != 'OBJECT':
         bpy.ops.object.mode_set(mode='OBJECT')
     
     # Make sure we have action data
-    if not bpy.context.object.animation_data:
-        bpy.context.object.animation_data_create()
+    if obj and not obj.animation_data:
+        obj.animation_data_create()
     
     # ============================================================
     # Apply all modifiers to mesh objects (critical for GLB export)
     # ============================================================
     
-    # Select all mesh objects
-    mesh_objects = [obj for obj in bpy.data.objects if obj.type == 'MESH']
+    # Collect all mesh objects
+    mesh_objects = []
+    for ob in bpy.data.objects:
+        if ob.type == 'MESH':
+            mesh_objects.append(ob)
     
-    # Deselect everything first
-    bpy.context.view_layer.objects.select_all(action='DESELECT')
+    # Deselect everything, then select each mesh to apply modifiers
+    # Use the operator from bpy directly
+    bpy.ops.object.select_all(action='DESELECT')
     
-    # Apply modifiers to each mesh object
-    for obj in mesh_objects:
-        obj.select_set(True)
-        bpy.context.view_layer.objects.active = obj
+    for ob in mesh_objects:
+        ob.select_set(True)
+        bpy.context.view_layer.objects.active = ob
         
-        # Apply all modifiers
-        for mod in obj.modifiers:
-            if mod.type in ('SUBSURF', 'BEVEL', 'MIRROR', 'SUBSURF_2'):
+        # Apply all modifiers except ARMATURE
+        for mod in ob.modifiers:
+            if mod.type in ('SUBSURF', 'BEVEL', 'MIRROR'):
                 bpy.ops.object.modifier_apply(modifier=mod.name)
     
     # Deselect after applying
-    bpy.context.view_layer.objects.select_all(action='DESELECT')
+    bpy.ops.object.select_all(action='DESELECT')
     
     # ============================================================
     # Shape Key / Morph Target Handling
@@ -94,63 +111,50 @@ def main():
         # Ensure directory exists
         os.makedirs(os.path.dirname(full_glb_path), exist_ok=True)
         
-        # Deselect all, select the main objects for export
-        bpy.context.view_layer.objects.select_all(action='DESELECT')
-        
         # Select key objects: body, armature, block stack
+        bpy.ops.object.select_all(action='DESELECT')
+        
+        objects_to_select = []
         if 'Kobo_Body' in bpy.data.objects:
-            bpy.data.objects['Kobo_Body'].select_set(True)
+            objects_to_select.append(bpy.data.objects['Kobo_Body'])
         if 'Armature' in bpy.data.objects:
-            bpy.data.objects['Armature'].select_set(True)
+            objects_to_select.append(bpy.data.objects['Armature'])
         if 'BlockStack' in bpy.data.objects:
-            bpy.data.objects['BlockStack'].select_set(True)
+            objects_to_select.append(bpy.data.objects['BlockStack'])
+        
+        for o in objects_to_select:
+            o.select_set(True)
         
         # Deselect camera and lights
-        for obj in bpy.data.objects:
-            if obj.type in ('CAMERA', 'LIGHT'):
-                obj.select_set(False)
+        for ob in bpy.data.objects:
+            if ob.type in ('CAMERA', 'LIGHT'):
+                ob.select_set(False)
         
         # Set active object
-        bpy.context.view_layer.objects.active = bpy.data.objects.get('Kobo_Body') or bpy.data.objects.get('Armature')
+        if objects_to_select:
+            bpy.context.view_layer.objects.active = objects_to_select[0]
         
         # Export settings for glTF
         print(f"Exporting full GLB to: {full_glb_path}")
         
         try:
-            # Export settings based on AGENTS.md requirements
             bpy.ops.export_scene.gltf(
                 filepath=full_glb_path,
                 export_format='GLB',
                 use_selection=True,
-                export_materials='NONE',  # Export as mesh only (matrices in blender)
+                export_materials='NONE',  # Export as mesh only
                 export_animations=True,  # All actions
                 export_nla_strips=False,
-                export_morph_targets=True,  # Shape keys/blink, smile, etc.
                 export_yup=True,  # Convert from Z-up (blender) to Y-up (glTF)
                 export_apply=True,  # Apply modifiers, materials, etc.
                 export_textures=False,  # No image textures - flat colours/procedural only
                 export_empty_as_null=True,
-                # Key features from AGENTS.md:
-                # - animations: Idle, Wave, Celebrate, Think, HopIn
-                # - morph targets: blink, smile, surprised, think  
-                # - nodes: Kobo_Root, Head, BlockStack, Block_01...Block_12
-                # - materials: flat colours/procedural only
             )
             
             file_size = os.path.getsize(full_glb_path)
             print(f"Full GLB exported successfully!")
             print(f"  File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
             
-            # Check triangle count by parsing the GLB
-            try:
-                with open(full_glb_path, 'r') as f:
-                    glb_data = f.read()
-                # Parse GLB binary format to find triangle count
-                # Simplified: just report
-                print(f"  GLB file parsed successfully")
-            except Exception as e:
-                print(f"  Note: {e}")
-                
         except RuntimeError as e:
             print(f"GLB export failed: {e}")
     
@@ -168,8 +172,7 @@ def main():
         print(f"Exporting lite GLB to: {lite_glb_path}")
         
         # Strategy: Duplicate the body, apply Decimate modifier to reduce triangles
-        # First, select and duplicate the body
-        bpy.context.view_layer.objects.select_all(action='DESELECT')
+        bpy.ops.object.select_all(action='DESELECT')
         
         if 'Kobo_Body' in bpy.data.objects:
             body_orig = bpy.data.objects['Kobo_Body']
@@ -181,7 +184,7 @@ def main():
             body_dec = bpy.context.active_object
             body_dec.name = "Kobo_Body_Decimated"
             
-            # Add Decimate modifier (TRIANGULATE then DECIMATE)
+            # Add Decimate modifier (DISSOLVE to reduce triangles)
             mod_decimate = body_dec.modifiers.new(name="Decimate", type='DECIMATE')
             mod_decimate.decimate_type = 'DISSOLVE'
             mod_decimate.ratio = 0.3  # Reduce to ~30% of original triangles
@@ -190,7 +193,7 @@ def main():
             bpy.ops.object.modifier_apply(modifier="Decimate")
             
             # Select only the decimated body for export
-            bpy.context.view_layer.objects.select_all(action='DESELECT')
+            bpy.ops.object.select_all(action='DESELECT')
             body_dec.select_set(True)
             bpy.context.view_layer.objects.active = body_dec
             
@@ -213,33 +216,40 @@ def main():
                 print(f"Lite GLB exported successfully!")
                 print(f"  File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
                 
-                # Check triangle count
-                try:
-                    with open(lite_glb_path, 'r') as f:
-                        pass  # GLB is binary, skip parsing
-                    print(f"  Lite GLB triangle count: reduced from original")
-                except:
-                    pass
-                    
             except RuntimeError as e:
                 print(f"Lite GLB export failed: {e}")
-                # Fallback: export without decimation
-                bpy.ops.export_scene.gltf(
-                    filepath=lite_glb_path,
-                    export_format='GLB',
-                    use_selection=True,
-                    export_materials='NONE',
-                    export_animations=True,
-                    export_yup=True,
-                    export_apply=True,
-                )
-                file_size = os.path.getsize(lite_glb_path)
-                print(f"Fallback GLB exported: {file_size:,} bytes")
+                # Fallback: export the original without decimation
+                bpy.ops.object.select_all(action='DESELECT')
+                if 'Kobo_Body' in bpy.data.objects:
+                    body_orig.select_set(True)
+                    bpy.context.view_layer.objects.active = body_orig
+                    bpy.ops.export_scene.gltf(
+                        filepath=lite_glb_path,
+                        export_format='GLB',
+                        use_selection=True,
+                        export_materials='NONE',
+                        export_animations=True,
+                        export_yup=True,
+                        export_apply=True,
+                        export_textures=False,
+                    )
+                    file_size = os.path.getsize(lite_glb_path)
+                    print(f"Fallback GLB exported: {file_size:,} bytes")
         else:
             print("No Kobo_Body object found for decimation")
             # Export full version as fallback
             if export_full:
-                # Re-export full version
+                bpy.ops.object.select_all(action='DESELECT')
+                objects_to_select = []
+                if 'Kobo_Body' in bpy.data.objects:
+                    objects_to_select.append(bpy.data.objects['Kobo_Body'])
+                if 'Armature' in bpy.data.objects:
+                    objects_to_select.append(bpy.data.objects['Armature'])
+                if 'BlockStack' in bpy.data.objects:
+                    objects_to_select.append(bpy.data.objects['BlockStack'])
+                for o in objects_to_select:
+                    o.select_set(True)
+                bpy.context.view_layer.objects.active = objects_to_select[0] if objects_to_select else None
                 bpy.ops.export_scene.gltf(
                     filepath=lite_glb_path,
                     export_format='GLB',
