@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { calculateAvailableToSpend, SalarySplitRule, SplitCategory, validateSalarySplit } from '@/lib/salary-split'
+import { calculateAvailableToSpend, SalarySplitRule, validateSalarySplit } from '@/lib/salary-split'
 import { calculateContribution, createShopSaveRule, ShopSaveRuleType } from '@/lib/shop-save'
 import { createGoal, GoalCategory } from '@/lib/goals'
 import { formatKobo, nairaToKobo } from '@/lib/money'
@@ -156,16 +156,14 @@ function GoalsPage() {
 
 function SavePage({ onboarding = false }: { onboarding?: boolean }) {
   const router = useRouter()
-  const { value: savedSplit, setValue: setSavedSplit, ready: splitReady } = useDemoStorage<{
+  const { value: splitDraft, setValue: setSplitDraft, ready: splitReady, storageError } = useDemoStorage<{
     salaryNaira: number
     spending: number
     savings: number
     goal: number
-  } | null>('buy-build:salary-split', null)
-  const [salary, setSalary] = useState('200000')
-  const [spending, setSpending] = useState(50)
-  const [savings, setSavings] = useState(30)
-  const [goal, setGoal] = useState(20)
+  }>('buy-build:salary-split', { salaryNaira: 200000, spending: 50, savings: 30, goal: 20 })
+  const salary = String(splitDraft.salaryNaira)
+  const { spending, savings, goal } = splitDraft
   const [ruleType, setRuleType] = useState<ShopSaveRuleType>('percentage')
   const [ruleValue, setRuleValue] = useState('5')
   const [optIn, setOptIn] = useState(false)
@@ -174,21 +172,13 @@ function SavePage({ onboarding = false }: { onboarding?: boolean }) {
   const [splitMessage, setSplitMessage] = useState('')
   const [splitError, setSplitError] = useState('')
 
-  useEffect(() => {
-    if (!savedSplit) return
-    setSalary(String(savedSplit.salaryNaira))
-    setSpending(savedSplit.spending)
-    setSavings(savedSplit.savings)
-    setGoal(savedSplit.goal)
-  }, [savedSplit])
-
   const rules: SalarySplitRule[] = [
     { id: 'spending', category: 'spending', allocationPercentage: spending, isActive: true },
     { id: 'savings', category: 'savings', allocationPercentage: savings, isActive: true },
     { id: 'goal', category: 'goal', allocationPercentage: goal, isActive: true, goalId: 'lifestyle-goal' },
   ]
   const split = validateSalarySplit(Number(salary), rules)
-  const allocations = useMemo(() => calculateAvailableToSpend(Number(salary), rules), [salary, spending, savings, goal])
+  const allocations = calculateAvailableToSpend(Number(salary), rules)
 
   function saveSplit() {
     if (!split.valid) {
@@ -196,7 +186,7 @@ function SavePage({ onboarding = false }: { onboarding?: boolean }) {
       setSplitMessage('')
       return
     }
-    setSavedSplit({ salaryNaira: Number(salary), spending, savings, goal })
+    setSplitDraft({ salaryNaira: Number(salary), spending, savings, goal })
     setSplitError('')
     setSplitMessage('Your salary split was saved in this browser.')
     if (onboarding) router.push('/dashboard')
@@ -225,14 +215,14 @@ function SavePage({ onboarding = false }: { onboarding?: boolean }) {
         <section className={panelClass}>
           <h2 className="text-lg font-semibold">Salary Split</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">Allocation percentages must add up to exactly 100% before you save.</p>
-          <label className={`${labelClass} mt-5`}>Monthly income (₦)<input className={fieldClass} type="number" min="1" value={salary} onChange={(event) => setSalary(event.target.value)} /></label>
+          <label className={`${labelClass} mt-5`}>Monthly income (₦)<input className={fieldClass} type="number" min="1" value={salary} onChange={(event) => setSplitDraft((current) => ({ ...current, salaryNaira: Number(event.target.value) }))} /></label>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {([
               ['Spending', spending, setSpending],
               ['Savings', savings, setSavings],
               ['Goals', goal, setGoal],
-            ] as const).map(([label, amount, setter]) => (
-              <label key={label} className={labelClass}>{label} (%)<input className={fieldClass} type="number" min="0" max="100" value={amount} onChange={(event) => setter(Number(event.target.value))} /></label>
+            ] as const).map(([label, amount, key]) => (
+              <label key={label} className={labelClass}>{label} (%)<input className={fieldClass} type="number" min="0" max="100" value={amount} onChange={(event) => setSplitDraft((current) => ({ ...current, [key]: Number(event.target.value) }))} /></label>
             ))}
           </div>
           <p className={`mt-4 font-medium ${split.valid ? 'text-[var(--green-growth)]' : 'text-[var(--alert-coral)]'}`} role="status">Total: {spending + savings + goal}% {split.valid ? '· Ready to save' : '· Adjust to exactly 100%'}</p>
@@ -243,7 +233,7 @@ function SavePage({ onboarding = false }: { onboarding?: boolean }) {
           </div>
           {!split.valid && <p className="mt-3 text-sm text-[var(--alert-coral)]">{split.errors.join(' ')}</p>}
           <button className={`${buttonClass} mt-5`} type="button" disabled={!split.valid || !splitReady} onClick={saveSplit}>{onboarding ? 'Save split and continue' : 'Save salary split'}</button>
-          <FormNotice error={splitError} success={splitMessage} />
+          <FormNotice error={splitError || storageError || ''} success={splitMessage} />
         </section>
 
         <section className={panelClass}>
@@ -514,8 +504,49 @@ function InfoPage({ screen }: { screen: FeatureScreen }) {
   if (screen === 'cards') return <PageFrame title="Cards" description="Manage demo card controls. No real card details are collected or stored."><CardsPanel /></PageFrame>
   if (screen === 'coach') return <PageFrame title="Money coach" description="Practical, non-judgmental prompts to help you stay intentional with your money."><section className={`${panelClass} space-y-4`}>{[['Start with your priorities','Choose a salary split that reflects what matters to you. You can update it when your circumstances change.'],['Keep savings and investments separate','Review each balance on its own. Investment values may rise or fall; returns are never guaranteed.'],['Shop & Save stays optional','Purchase-linked contributions only happen after explicit opt-in, and you can pause the rule at any time.']].map(([title,body]) => <article key={title} className="rounded-xl bg-[var(--raised)] p-4"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{body}</p></article>)}</section></PageFrame>
   if (screen === 'profile') return <ProfilePage />
-  if (screen === 'settings') return <PageFrame title="Settings & privacy" description="Control your preferences and understand what a real launch would require."><section className={`${panelClass} space-y-4`}><p>Demo mode is active. No bank, payment, or investment provider is connected.</p><Link className="block rounded-xl border border-[var(--border)] p-4 underline" href="/how-money-is-handled">How your money is handled</Link><p className="text-sm leading-6 text-[var(--muted)]">We minimise data, ask for consent before optional contributions, and avoid storing BVN, NIN, card numbers, or passwords. A production launch needs a documented retention and deletion process and legal review under Nigerian data-protection and financial regulations.</p><p className="text-sm text-[var(--muted)]">No sensitive identity or card information is requested in this demo.</p></section></PageFrame>
+  if (screen === 'settings') return <PageFrame title="Settings & privacy" description="Control your preferences and understand what a real launch would require."><section className={`${panelClass} space-y-4`}><p>Demo mode is active. No bank, payment, or investment provider is connected.</p><ThemePreference /><Link className="block rounded-xl border border-[var(--border)] p-4 underline" href="/how-money-is-handled">How your money is handled</Link><p className="text-sm leading-6 text-[var(--muted)]">We minimise data, ask for consent before optional contributions, and avoid storing BVN, NIN, card numbers, or passwords. A production launch needs a documented retention and deletion process and legal review under Nigerian data-protection and financial regulations.</p><p className="text-sm text-[var(--muted)]">No sensitive identity or card information is requested in this demo.</p></section></PageFrame>
   return <PageFrame title="How your money is handled" description="Buy & Build is a technology and customer-experience layer. Regulated partners provide any real financial services."><section className={`${panelClass} max-w-3xl space-y-4 text-sm leading-6`}><p><strong>Demo mode — no real money moves.</strong> Balances, contributions, transfers, and investments in this prototype are examples only.</p><p>At a real launch, banks, payment providers, and licensed investment operators would provide the regulated financial services. Buy & Build would not use customer funds as working capital.</p><p>Savings and investments are separate. Investment value may go up or down; there are no guaranteed returns. Partner fees, risks, and withdrawal conditions must be shown before a real transaction.</p><p>Joint pots are savings-only. A real launch would need a regulated partner to hold pooled funds and verify every member. This prototype does not imply insurance or returns.</p><p>We do not collect real BVN, NIN, card numbers, or passwords here. A real launch requires data minimisation, clear consent, retention/deletion controls, and legal review under Nigerian data-protection and financial regulations.</p></section></PageFrame>
+}
+
+function ThemePreference() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [storageError, setStorageError] = useState('')
+
+  useEffect(() => {
+    try {
+      const savedTheme = window.localStorage.getItem('buy-build:theme')
+      if (savedTheme === 'light' || savedTheme === 'dark') setTheme(savedTheme)
+    } catch (error) {
+      console.error('Could not read the theme preference', error)
+      setStorageError('Your theme preference could not be loaded.')
+    }
+  }, [])
+
+  function chooseTheme(nextTheme: 'dark' | 'light') {
+    try {
+      window.localStorage.setItem('buy-build:theme', nextTheme)
+      setTheme(nextTheme)
+      setStorageError('')
+      document.documentElement.classList.toggle('light', nextTheme === 'light')
+      document.documentElement.classList.toggle('dark', nextTheme === 'dark')
+      document.documentElement.dataset.theme = nextTheme
+    } catch (error) {
+      console.error('Could not save the theme preference', error)
+      setStorageError('Your theme preference could not be saved.')
+    }
+  }
+
+  return (
+    <fieldset className="rounded-xl border border-[var(--border)] p-4">
+      <legend className="px-1 text-sm font-medium">Appearance</legend>
+      <div className="mt-2 flex gap-2">
+        {(['dark', 'light'] as const).map((option) => (
+          <button key={option} type="button" aria-pressed={theme === option} onClick={() => chooseTheme(option)} className={`min-h-11 rounded-lg border px-4 py-2 text-sm capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] ${theme === option ? 'border-[var(--accent-violet)] bg-[var(--raised)]' : 'border-[var(--border)]'}`}>{option}</button>
+        ))}
+      </div>
+      {storageError && <p role="alert" className="mt-2 text-sm text-[var(--alert-coral)]">{storageError}</p>}
+    </fieldset>
+  )
 }
 
 function CardsPanel() {

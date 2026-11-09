@@ -17,6 +17,7 @@ export interface CoachInsight {
   priority: 'low' | 'medium' | 'high'
   actionUrl?: string
   actionLabel?: string
+  createdAt: number
 }
 
 // Generate rule-based insights for a user
@@ -118,5 +119,5 @@ export function getAllCoachInsights(
   userId: string,
   pots: JointPot[] = []
 ): CoachInsight[] {
-  return getCoachInsightsFn(userId, pots)
+  return getCoachInsightsFn(userId, pots).insights
 }

@@ -95,6 +95,7 @@
 | `amount_kobo` | BIGINT | Not null, check: `> 0` | - | Index |
 | `type` | TEXT | Not null, `IN ('spend', 'save', 'withdraw', 'contribute')` | - | - |
 | `reason` | TEXT | nullable | - | - |
+| `destination` | TEXT | Not null, `IN ('owner_wallet', 'member_wallet')` | - | - |
 | `status` | TEXT | default 'completed', check: `IN ('completed', 'pending', 'failed')` | - | - |
 | `created_at` | TIMESTAMPTZ | default now() | - | - |
 | `updated_at` | TIMESTAMPTZ | default now(), on update now() | - | - |
@@ -117,7 +118,7 @@
 |-------|------|------------- |---------------|-------|
 | `id` | UUID | Primary Key, default gen_random_uuid() | - | Primary |
 | `user_id` | UUID | Not null, FK → users(id), ON DELETE cascade | users | Index |
-| `type` | TEXT | Not null, `IN ('invite', 'contribution', 'withdrawal_request', 'withdrawal_vote', 'milestone', 'member_left')` | - | - |
+| `type` | TEXT | Not null, `IN ('invite', 'contribution', 'withdrawal_request', 'withdrawal_vote', 'milestone', 'member_left', 'pot_closed')` | - | - |
 | `title` | TEXT | Not null | - | - |
 | `body` | TEXT | Not null | - | - |
 | `data` | JSONB | nullable, key-value for extra context | - | - |
@@ -160,6 +161,7 @@
 | `current_kobo` | BIGINT | Not null, default 0, check: `>= 0` | - | Index |
 | `deadline` | TIMESTAMPTZ | nullable | - | - |
 | `approval_rule` | TEXT | Not null, `IN ('all', 'majority', 'owner_up_to_ngx')` | - | - |
+| `owner_approval_limit_kobo` | BIGINT | nullable; required and `> 0` when `approval_rule = 'owner_up_to_ngx'` | - | - |
 | `owner_user_id` | UUID | Not null, FK → users(id), ON DELETE cascade | users | Index |
 | `max_members` | INTEGER | default 10, check: `>= 2 AND <= 10` | - | - |
 | `fee_kobo` | BIGINT | default 0, check: `>= 0` (withdrawal fee, demo) | - | - |

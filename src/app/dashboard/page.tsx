@@ -344,7 +344,7 @@ export default function Dashboard() {
                   Reason (optional)
                 </label>
                 <textarea
-                  rows="2"
+                  rows={2}
                   className="w-full rounded-md px-4 py-2 border border-[var(--border)] bg-[var(--ink)] text-[var(--text)] focus:border-[var(--accent-violet)] transition-colors"
                   placeholder="e.g. paying back a friend"
                 ></textarea>
@@ -438,7 +438,7 @@ export default function Dashboard() {
                   Reason (optional)
                 </label>
                 <textarea
-                  rows="2"
+                  rows={2}
                   className="w-full rounded-md px-4 py-2 border border-[var(--border)] bg-[var(--ink)] text-[var(--text)] focus:border-[var(--accent-violet)] transition-colors"
                   placeholder="e.g. paying rent"
                 ></textarea>

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { gsap } from 'gsap'
+import { useReducedMotion } from '@/lib/motion'
 
 /**
  * Marketing Homepage - Buy & Build landing page.
@@ -20,7 +21,11 @@ import { gsap } from 'gsap'
  */
 
 export default function Home() {
+  const reducedMotion = useReducedMotion()
+
   useEffect(() => {
+    if (reducedMotion) return
+
     // GSAP hero entrance animation
     gsap.from('.hero-title', {
       duration: 1,
@@ -71,8 +76,11 @@ export default function Home() {
       observer.observe(el)
     })
 
-    return () => observer.disconnect()
-  }, [])
+    return () => {
+      observer.disconnect()
+      gsap.killTweensOf('.hero-title, .hero-subtitle, .cta-button, .reveal')
+    }
+  }, [reducedMotion])
 
   return (
     <main className="min-h-screen">

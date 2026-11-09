@@ -13,7 +13,7 @@ export interface InvestmentProduct {
   name: string
   description: string
   riskLevel: 'low' | 'medium' | 'high'
-  expectedReturn: string  // e.g. "5-7% annually"
+  returnNote: string
   minimumInvestmentKobo: number
   currentValueKobo: number
   targetAllocationKobo: number
@@ -26,9 +26,9 @@ export const MOCK_INVESTMENT_PRODUCTS: InvestmentProduct[] = [
   {
     id: 'inv_1',
     name: 'Nigeria Treasury Bills',
-    description: 'Federal government debt securities with minimal risk',
+    description: 'Government debt securities offered through a regulated partner.',
     riskLevel: 'low',
-    expectedReturn: '5-6% annually',
+    returnNote: 'Partner offer documents explain applicable rates, fees, and withdrawal terms. Returns are not guaranteed.',
     minimumInvestmentKobo: nairaToKobo(10000), // ₦10,000
     currentValueKobo: nairaToKobo(12000), // ₦12,000 current value
     targetAllocationKobo: nairaToKobo(10000),
@@ -40,7 +40,7 @@ export const MOCK_INVESTMENT_PRODUCTS: InvestmentProduct[] = [
     name: 'Fixed Income Fund',
     description: ' diversified basket of bonds and debt instruments',
     riskLevel: 'medium',
-    expectedReturn: '6-8% annually',
+    returnNote: 'Partner offer documents explain applicable rates, fees, and withdrawal terms. Returns are not guaranteed.',
     minimumInvestmentKobo: nairaToKobo(20000), // ₦20,000
     currentValueKobo: nairaToKobo(21500), // ₦21,500 current value
     targetAllocationKobo: nairaToKobo(20000),
@@ -52,7 +52,7 @@ export const MOCK_INVESTMENT_PRODUCTS: InvestmentProduct[] = [
     name: 'Agri-Business Scheme',
     description: 'Investment in agricultural value chain enterprises',
     riskLevel: 'high',
-    expectedReturn: '8-12% annually',
+    returnNote: 'Partner offer documents explain applicable rates, fees, and withdrawal terms. Returns are not guaranteed.',
     minimumInvestmentKobo: nairaToKobo(50000), // ₦50,000
     currentValueKobo: nairaToKobo(52000), // ₦52,000 current value
     targetAllocationKobo: nairaToKobo(50000),
@@ -98,7 +98,7 @@ export function makeInvestmentContribution(
     return {
       success: false,
       newValueKobo: product.currentValueKobo,
-      message: `Minimum investment is ₦${product.minimumInvestmentKobo / 100}`,
+      message: `Minimum investment is ${formatKobo(product.minimumInvestmentKobo)}`,
     }
   }
 
@@ -108,7 +108,7 @@ export function makeInvestmentContribution(
   return {
     success: true,
     newValueKobo,
-    message: `Investment of ₦${amountKobo / 100} in ${product.name} successful (demo mode)`,
+    message: `Investment of ${formatKobo(amountKobo)} in ${product.name} recorded in demo mode`,
   }
 }
 
@@ -120,3 +120,4 @@ export const INVESTMENT_RISK_NOTE: string = (
   'Your capital is at risk. Past performance does not predict future results. ' +
   'Always read the offer document before investing.'
 )
+import { addKobo, formatKobo, nairaToKobo } from '@/lib/money'

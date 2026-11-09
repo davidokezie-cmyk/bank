@@ -20,6 +20,7 @@ import { KoboFallback } from '@/components/three/KoboFallback'
 
 export default function DevKobo() {
   const reducedMotion = useReducedMotion()
+  const isReducedMotion = reducedMotion === true
 
   const moods = ['idle', 'wave', 'celebrate', 'thinking'] as const
   const models = ['glb', 'procedural'] as const
@@ -66,7 +67,7 @@ export default function DevKobo() {
     <div className="dev-kobo-page">
       <header className="dev-page-header">
         <h1>Kobo Mascot Preview</h1>
-        <p>Preview all moods and both Koba models</p>
+        <p>Preview all moods and both Kobo models</p>
       </header>
 
       <section className="dev-model-selector">
@@ -79,7 +80,7 @@ export default function DevKobo() {
                 value={model}
                 checked={currentModel === model}
                 onChange={() => switchModel(model)}
-                disabled={reducedMotion}
+                disabled={isReducedMotion}
                 aria-label={`Switch to ${model} model`}
               />
               <span>{fileSizeLabels[model]}</span>
@@ -98,7 +99,7 @@ export default function DevKobo() {
               onClick={() => switchMood(mood)}
               aria-pressed={currentMood === mood}
               aria-label={`Switch to ${mood} mood`}
-              disabled={reducedMotion}
+              disabled={isReducedMotion}
             >
               {moodLabels[mood] || 'Idle'}
               {reducedMotion && <span className="sr-only">(reduced motion)</span>}
@@ -108,7 +109,7 @@ export default function DevKobo() {
       </section>
 
       <section className="dev-koba-display">
-        {reducedMotion ? (
+        {isReducedMotion ? (
           <KoboFallback mood={currentMood} reducedMotion={true} />
         ) : currentModel === 'glb' ? (
             <div className="kobo-glb-placeholder">

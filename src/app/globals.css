@@ -29,7 +29,11 @@ html.light {
   --border: #D1D5DB;
   --text: #111827;
   --muted: #6B7280;
-  --accent-violet: #A78bfa;
+  --accent-violet: #6D28D9;
+  --accent-indigo: #4F46E5;
+  --gold: #805500;
+  --green-growth: #137A45;
+  --alert-coral: #B42318;
   --gold-light: #FBBF24;
   --green-growth-light: #14b8a6;
   --alert-coral-light: #F87171;
@@ -78,9 +82,12 @@ body {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .no-reduce * {
-    transition: none !important;
-    animation: none !important;
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

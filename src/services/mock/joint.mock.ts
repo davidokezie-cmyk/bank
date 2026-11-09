@@ -13,7 +13,7 @@ import {
   JointPotMember, WithdrawalRequest, JointContribution,
   ApprovalRule, MemberRole
 } from '@/lib/joint-pot'
-import { nairaToKobo } from '@/lib/money'
+import { addKobo, koboToNaira, nairaToKobo } from '@/lib/money'
 
 // Demo users
 export const DEMO_USERS = [
@@ -68,10 +68,10 @@ export const LAGOS_RENT_FUND = (() => {
   // But we need to use the contribute function... for the demo, just set balances
 
   // Set current balance to ₦75,000 (₦30k + ₦25k + ₦20k)
-  ;(pot as any).currentKobo = nairaToKobo(75000)
+  pot.currentKobo = nairaToKobo(75000)
 
   // Add contributions manually for demo
-  ;(pot as any).contributions = [
+  pot.contributions = [
     {
       id: 'contrib_1',
       potId: pot.id,
@@ -106,10 +106,18 @@ export const LAGOS_RENT_FUND = (() => {
       createdAt: Date.now() - 48000000, // 3 days ago
     },
   ]
+  pot.members = pot.members.map((member) => ({
+    ...member,
+    contributionKobo: member.userId === 'user_1'
+      ? nairaToKobo(20000)
+      : member.userId === 'user_2'
+        ? nairaToKobo(30000)
+        : nairaToKobo(25000),
+  }))
 
   // Add a pending withdrawal request (majority approval needed)
   // ₦20,000 withdrawal, needs votes from 2 of 3 members
-  const withdrawalRequest = {
+  const withdrawalRequest: WithdrawalRequest = {
     id: 'withdrawal_1',
     potId: pot.id,
     requestedByUserId: 'user_1',
@@ -118,14 +126,15 @@ export const LAGOS_RENT_FUND = (() => {
     status: 'pending',
     votesYes: 1, // owner voted yes
     votesNo: 0,
+    votesByUserId: { user_1: 'yes' },
     createdAt: Date.now() - 24000000, // 24 hours ago (within 72h window)
     expiresAt: Date.now() + 48000000, // 48 hours from now (within 72h)
   }
 
-  ;(pot as any).withdrawalRequests = [withdrawalRequest]
+  pot.withdrawalRequests = [withdrawalRequest]
 
   // Add notification about the pending withdrawal
-  ;(pot as any).notifications = [
+  pot.notifications = [
     {
       id: 'notif_1',
       potId: pot.id,
@@ -151,7 +160,8 @@ export const ZANZIBAR_TRIP = (() => {
     'owner_up_to_ngx', // owner approves up to ₦X
     'user_2', // owner (Tunde)
     3, // max 3 members
-    0 // no fee
+    0, // no fee
+    nairaToKobo(50000)
   )
 
   // Add members
@@ -162,10 +172,10 @@ export const ZANZIBAR_TRIP = (() => {
   // Set some contributions
   // Chioma contributes ₦100,000
   // Tunde (owner) contributes ₦50,000
-  ;(pot as any).currentKobo = nairaToKobo(150000)
+  pot.currentKobo = nairaToKobo(150000)
 
   // Add contributions
-  ;(pot as any).contributions = [
+  pot.contributions = [
     {
       id: 'contrib_4',
       potId: pot.id,
@@ -189,13 +199,19 @@ export const ZANZIBAR_TRIP = (() => {
       createdAt: Date.now() - 86400000,
     },
   ]
+  pot.members = pot.members.map((member) => ({
+    ...member,
+    contributionKobo: member.userId === 'user_2'
+      ? nairaToKobo(50000)
+      : nairaToKobo(100000),
+  }))
 
   // Add a pending withdrawal request (owner-up-to-₦50,000 rule)
   // ₦80,000 requested - but owner (Tunde) can approve up to ₦50,000
   // Since non-owner Chioma requested ₦80,000, this needs majority approval
   // Actually for owner-up-to-ngx, only the owner can approve amounts up to ₦50,000
   // For non-owner requests, we use majority rule
-  const withdrawalRequest = {
+  const withdrawalRequest: WithdrawalRequest = {
     id: 'withdrawal_2',
     potId: pot.id,
     requestedByUserId: 'user_3', // Chioma requested
@@ -204,14 +220,15 @@ export const ZANZIBAR_TRIP = (() => {
     status: 'pending',
     votesYes: 0,
     votesNo: 0,
+    votesByUserId: {},
     createdAt: Date.now() - 12000000, // 12 hours ago (within 72h window)
     expiresAt: Date.now() + 72000000, // 72 hours from now
   }
 
-  ;(pot as any).withdrawalRequests = [withdrawalRequest]
+  pot.withdrawalRequests = [withdrawalRequest]
 
   // Add notification
-  ;(pot as any).notifications = [
+  pot.notifications = [
     {
       id: 'notif_2',
       potId: pot.id,
@@ -251,7 +268,7 @@ export function getPendingInvites(): JointInvite[] {
 
   // Add a pending invite to the Lagos Rent Fund for user_3
   // (sent by user_1, but user_3 hasn't accepted yet - or rather, this is an old invite)
-  const oldInvite = {
+  const oldInvite: JointInvite = {
     id: 'invite_1',
     potId: LAGOS_RENT_FUND.id,
     email: 'chioma.pending@example.com',
@@ -262,7 +279,7 @@ export function getPendingInvites(): JointInvite[] {
   }
 
   // Add a pending invite to Zanzibar Trip for a new user
-  const newInvite = {
+  const newInvite: JointInvite = {
     id: 'invite_2',
     potId: ZANZIBAR_TRIP.id,
     email: 'new.user@example.com',
@@ -274,6 +291,11 @@ export function getPendingInvites(): JointInvite[] {
 
   invites.push(oldInvite, newInvite)
   return invites
+}
+
+function divideKoboMultiplyTotal(a: number, b: number, c: number): number {
+  if (b === 0) return 0
+  return Math.round((a * c) / b)
 }
 
 /**

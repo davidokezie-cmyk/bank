@@ -47,9 +47,9 @@ describe('Salary Split - Pure Functions', () => {
   describe('removeRule', () => {
     it('should remove a rule and rebalance', () => {
       const rules = [
-        { id: 'r1', category: 'spending', allocationPercentage: 50, isActive: true },
-        { id: 'r2', category: 'savings', allocationPercentage: 30, isActive: true },
-        { id: 'r3', category: 'goal', allocationPercentage: 20, isActive: true },
+        { id: 'r1', category: 'spending' as SplitCategory, allocationPercentage: 50, isActive: true },
+        { id: 'r2', category: 'savings' as SplitCategory, allocationPercentage: 30, isActive: true },
+        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true },
       ]
       const { remainingRules, rebalanced } = removeRule(rules, 'savings')
       expect(rebalanced).toBe(true)
@@ -64,7 +64,7 @@ describe('Salary Split - Pure Functions', () => {
 
     it('should handle removing the only rule', () => {
       const rules = [
-        { id: 'r1', category: 'spending', allocationPercentage: 100, isActive: true },
+        { id: 'r1', category: 'spending' as SplitCategory, allocationPercentage: 100, isActive: true },
       ]
       const { remainingRules } = removeRule(rules, 'spending')
       expect(remainingRules.length).toBe(0)

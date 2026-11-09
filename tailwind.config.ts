@@ -15,7 +15,6 @@ const config: Config = {
         ink: 'var(--ink)',
         surface: 'var(--surface)',
         raised: 'var(--raised)',
-        'border': 'var(--border)',
         inkLight: 'var(--ink-light)',
         surfaceLight: 'var(--surface-light)',
         raisedLight: 'var(--raised-light)',

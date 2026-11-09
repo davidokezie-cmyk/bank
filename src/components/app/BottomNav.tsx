@@ -47,7 +47,7 @@ export const BottomNav = () => {
             >
               {tab[1]}
             </Link>
-          ))
+          ))}
           <button
             type="button"
             onClick={() => setMoreOpen((open) => !open)}

@@ -1,3 +1,7 @@
+'use client'
+
+import { useState, useSyncExternalStore } from 'react'
+
 /**
  * Motion language: defined once here, used across all components.
  * Springs: stiffness ~260, damping ~24
@@ -39,7 +43,7 @@ export function useReducedMotion(): boolean {
 export function applyReducedMotion(node: HTMLElement | null, reduced: boolean): void {
   if (!node) return
   if (reduced) {
-    node.style.transition = 'opacity 150ms ease, margin 150ms ease, transform 150ms ease'
+    node.style.transition = 'opacity 150ms ease'
   } else {
     node.style.transition = ''
   }
@@ -66,5 +70,3 @@ export function useHover(): [boolean, (nextState: boolean) => void] {
   return useState(false)
 }
 'use client'
-
-import { useState, useSyncExternalStore } from 'react'

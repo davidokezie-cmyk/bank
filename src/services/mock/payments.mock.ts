@@ -6,6 +6,8 @@
  */
 
 // Transfer result interface
+import { formatKobo, nairaToKobo } from '@/lib/money'
+
 export interface TransferResult {
   success: boolean
   transactionId: string
@@ -20,17 +22,17 @@ export interface TransferResult {
  * In demo mode, always succeeds with a generated transaction ID.
  */
 export function initiateTransfer(
-  amount: number,
+  amountKobo: number,
   recipient: string
 ): TransferResult {
   const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   return {
     success: true,
     transactionId,
-    amount,
+    amountKobo,
     recipient,
     status: 'completed',
-    message: `Transfer of ₦${amount / 100} to ${recipient} completed successfully`,
+    message: `Transfer of ${formatKobo(amountKobo)} to ${recipient} completed successfully in demo mode`,
   }
 }
 
@@ -70,9 +72,4 @@ export function getBalance(): { balanceKobo: number; currency: string; message: 
     currency: 'NGN',
     message: 'Balance retrieved successfully (demo mode)',
   }
-}
-
-// Helper import - in real code, this would be from the money module
-function nairaToKobo(naira: number): number {
-  return Math.round(naira * 100)
 }

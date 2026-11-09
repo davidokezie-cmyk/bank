@@ -19,6 +19,12 @@ export interface TabsProps {
   className?: string
 }
 
+interface TabChildProps extends React.HTMLAttributes<HTMLButtonElement> {
+  value?: string
+  selected?: boolean
+  onValueChange?: (value: string) => void
+}
+
 export const Tabs = forwardRef<HTMLDivElement, TabsProps>((props, ref) => {
   const { value, onValueChange, children, showIndicator = true, className } = props
 
@@ -28,8 +34,9 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>((props, ref) => {
       className,
     )}>
       <div className="flex space-x-1" role="tablist">
-        {React.Children.toArray(children).map((child, index) => {
-          const childValue = child.props?.value || `tab-${index}`
+        {React.Children.map(children, (child, index) => {
+          if (!React.isValidElement<TabChildProps>(child)) return child
+          const childValue = child.props.value ?? `tab-${index}`
           const isActive = childValue === value
           
           return React.cloneElement(child, {
@@ -37,6 +44,8 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>((props, ref) => {
             onValueChange: (newValue: string) => onValueChange(newValue),
             selected: isActive,
             'aria-selected': isActive,
+            role: 'tab',
+            tabIndex: isActive ? 0 : -1,
             className: cn(
               'flex h-10 w-24 items-center justify-center rounded-md border border-border text-sm font-medium transition-colors',
               isActive && 'border-b-2 border-accent-violet text-accent-violet',

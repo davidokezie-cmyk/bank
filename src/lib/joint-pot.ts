@@ -35,11 +35,7 @@
  * requests/votes, milestones (25/50/75/100%), members leaving.
  */
 
-import { 
-  nairaToKobo, koboToNaira, addKobo, subtractKobo, 
-  multiplyKobo, percentageOfKobo, ensureTotal100 
-} from './money'
-import { createGoal, addContributionToGoal, isGoalPastDeadline } from './goals'
+import { nairaToKobo, koboToNaira, addKobo, subtractKobo } from './money'
 
 // Type definitions matching the backend schema
 
@@ -78,6 +74,7 @@ export interface WithdrawalRequest {
   status: 'pending' | 'approved' | 'rejected' | 'expired'
   votesYes: number
   votesNo: number
+  votesByUserId?: Record<string, Vote>
   createdAt: number
   expiresAt: number  // +72 hours
   approvedAt?: number
@@ -93,6 +90,7 @@ export interface JointPot {
   currentKobo: number
   deadline: number | null  // timestamp, null if no deadline
   approvalRule: ApprovalRule
+  ownerApprovalLimitKobo?: number
   ownerUserId: string
   maxMembers: number
   feeKobo: number  // withdrawal fee, demo
@@ -100,6 +98,7 @@ export interface JointPot {
   contributions: JointContribution[]
   withdrawalRequests: WithdrawalRequest[]
   createdAt: number
+  closedAt?: number
   notifications: JointNotification[]
 }
 
@@ -118,7 +117,7 @@ export interface JointContribution {
 export interface JointNotification {
   id: string
   potId: string
-  type: 'invite' | 'contribution' | 'withdrawal_request' | 'withdrawal_vote' | 'milestone' | 'member_left'
+  type: 'invite' | 'contribution' | 'withdrawal_request' | 'withdrawal_vote' | 'milestone' | 'member_left' | 'pot_closed'
   title: string
   body: string
   data?: Record<string, any>
@@ -146,7 +145,8 @@ export function createJointPot(
   approvalRule: ApprovalRule,
   ownerUserId: string,
   maxMembers: number = 5,
-  feeKobo: number = 0
+  feeKobo: number = 0,
+  ownerApprovalLimitKobo?: number,
 ): JointPot {
   const now = Date.now()
   
@@ -162,6 +162,9 @@ export function createJointPot(
   if (!['all', 'majority', 'owner_up_to_ngx'].includes(approvalRule)) {
     throw new Error('Invalid approval rule')
   }
+  if (approvalRule === 'owner_up_to_ngx' && (!Number.isSafeInteger(ownerApprovalLimitKobo) || (ownerApprovalLimitKobo ?? 0) <= 0)) {
+    throw new Error('Owner approval limit must be a positive amount in kobo')
+  }
   
   return {
     id: `pot_${Date.now()}`,
@@ -171,6 +174,7 @@ export function createJointPot(
     currentKobo: 0,
     deadline,
     approvalRule,
+    ownerApprovalLimitKobo,
     ownerUserId,
     maxMembers,
     feeKobo,
@@ -307,7 +311,7 @@ export function declineInvite(
  */
 export function isInviteExpired(invite: JointInvite, now?: number): boolean {
   const time = now || Date.now()
-  return time > invite.expiresAt
+  return time >= invite.expiresAt
 }
 
 /**
@@ -327,21 +331,20 @@ export function contributeToPot(
   userId: string,
   amountKobo: number,
   type: JointContribution['type'],
+  pot: JointPot,
   source?: string,
   memberColor?: string,
-  pot: JointPot
 ): { contribution: JointContribution; updatedPot: JointPot } {
   const now = Date.now()
-  
-  // Validate amount
-  if (amountKobo <= 0) {
+  const member = pot.members.find((item) => item.userId === userId && !item.leftAt)
+  if (!member) {
+    throw new Error('Only active pot members can contribute')
+  }
+  if (!Number.isSafeInteger(amountKobo) || amountKobo <= 0) {
     throw new Error('Contribution amount must be greater than zero')
   }
-  
-  // Check pot balance
-  if (amountKobo > pot.currentKobo + amountKobo) {
-    // This shouldn't happen - we check after adding
-    throw new Error('Insufficient pot balance')
+  if (pot.closedAt) {
+    throw new Error('Contributions cannot be made to a closed pot')
   }
   
   // Create the contribution
@@ -358,9 +361,12 @@ export function contributeToPot(
   }
   
   // Update the pot
-  const updatedPot = {
+  const updatedPot: JointPot = {
     ...pot,
     currentKobo: addKobo(pot.currentKobo, amountKobo),
+    members: pot.members.map((item) => item.userId === userId
+      ? { ...item, contributionKobo: addKobo(item.contributionKobo, amountKobo) }
+      : item),
     contributions: [...pot.contributions, contribution],
   }
   
@@ -398,87 +404,50 @@ export function contributeToPot(
  * @param userId User ID leaving
  * @returns { refundKobo, updatedPot, memberBeforeLeave }
  */
-function memberLeavesPot(pot: JointPot, userId: string): {
+export function memberLeavesPot(pot: JointPot, userId: string): {
   refundKobo: number
   updatedPot: JointPot
   memberBeforeLeave: JointPotMember
 } {
   // Find the member
-  const member = pot.members.find((m) => m.userId === userId)
+  const member = pot.members.find((m) => m.userId === userId && !m.leftAt)
   if (!member) {
     throw new Error('User is not a member of this pot')
   }
-  
-  // Calculate net contributions (total contributed - what's still in pot share)
-  // Net contributions = total contributed by this member
-  // But we need to figure out their share of the current pot balance
-  
-  // Get all contributions by this user
-  const userContributions = pot.contributions.filter(
-    (c) => c.userId === userId
-  )
-  
-  const totalContributed = userContributions.reduce(
-    (sum, c) => addKobo(sum, c.amountKobo),
-    0
-  )
-  
-  // Calculate their share of the current balance
-  // Simple proportional: their contributions / total contributions by all members * current balance
-  const totalAllContributions = pot.contributions.reduce(
-    (sum, c) => addKobo(sum, c.amountKobo),
-    0
-  )
-  
-  let refundKobo = 0
-  if (totalAllContributions > 0 && totalContributed > 0) {
-    // Proportional share: (their contributions / total contributions) * current balance
-    refundKobo = Math.round(
-      (divideKoboMultiplyTotal(totalContributed, totalAllContributions, pot.currentKobo) / 100) * 100
-    )
-    // Ensure we don't refund more than they contributed
-    refundKobo = Math.min(refundKobo, totalContributed)
-  } else if (totalContributed > 0) {
-    // If no total contributions from others, refund full amount
-    refundKobo = totalContributed
-  }
-  
-  // Update member: set leftAt and leftReason
   const memberBeforeLeave = { ...member }
-  
+  const activeMembers = pot.members.filter((item) => !item.leftAt)
+  const refunds = allocateProportionally(
+    pot.currentKobo,
+    activeMembers.map((item) => ({
+      userId: item.userId,
+      weightKobo: item.contributionKobo,
+      joinedAt: item.joinedAt,
+    })),
+  )
+  const refundKobo = refunds[userId] ?? 0
+  const now = Date.now()
   const updatedMembers = pot.members.map((m) =>
     m.userId === userId
-      ? { ...m, leftAt: Date.now(), leftReason: 'member_initiated' }
+      ? { ...m, contributionKobo: 0, leftAt: now, leftReason: 'member_initiated' }
       : m
   )
-  
-  // Remove contributions by this user from the pot
-  const updatedContributions = pot.contributions.filter(
-    (c) => c.userId !== userId
-  )
-  
-  // Update current balance (subtract user's contributions)
-  const updatedCurrentKobo = subtractKobo(pot.currentKobo, totalContributed)
-  
-  // Update member contributions (net)
-  const updatedMemberContributions = updatedMembers.map((m) =>
-    m.userId === userId
-      ? { ...m, contributionKobo: subtractKobo(m.contributionKobo, totalContributed) }
-      : m
-  )
-  
-  // Recalculate pot members
+  const notification: JointNotification = {
+    id: `notif_${now}`,
+    potId: pot.id,
+    type: 'member_left',
+    title: 'Member left the pot',
+    body: `${userId} left and received a proportional demo refund.`,
+    data: { userId, refundKobo },
+    read: false,
+    createdAt: now,
+  }
   const updatedPot: JointPot = {
     ...pot,
-    members: updatedMemberContributions,
-    currentKobo: updatedCurrentKobo,
-    contributions: updatedContributions,
+    members: updatedMembers,
+    currentKobo: subtractKobo(pot.currentKobo, refundKobo),
+    notifications: [...pot.notifications, notification],
   }
-  
-  // The refund amount
-  const refund = refundKobo
-  
-  return { refundKobo: refund, updatedPot, memberBeforeLeave }
+  return { refundKobo, updatedPot, memberBeforeLeave }
 }
 
 /**
@@ -486,10 +455,41 @@ function memberLeavesPot(pot: JointPot, userId: string): {
  * Since we don't have a full math library, use this pattern:
  * (a / b) * c = round((a * c) / b)
  */
-function divideKoboMultiplyTotal(a: number, b: number, c: number): number {
-  // Calculate (a / b) * c using integer arithmetic to avoid floats
-  // = round((a * c) / b)
-  return Math.round((a * c) / b)
+function allocateProportionally(
+  amountKobo: number,
+  members: Array<{ userId: string; weightKobo: number; joinedAt: number }>,
+): Record<string, number> {
+  if (!Number.isSafeInteger(amountKobo) || amountKobo < 0) {
+    throw new Error('Amount must be a non-negative integer number of kobo')
+  }
+  const totalWeight = members.reduce((sum, member) => sum + member.weightKobo, 0)
+  if (!Number.isSafeInteger(totalWeight) || totalWeight <= 0) {
+    if (amountKobo === 0) return Object.fromEntries(members.map(({ userId }) => [userId, 0]))
+    throw new Error('Cannot distribute pot balance without positive member contributions')
+  }
+
+  const total = BigInt(totalWeight)
+  const amount = BigInt(amountKobo)
+  const shares = members.map((member) => {
+    const numerator = amount * BigInt(member.weightKobo)
+    return {
+      userId: member.userId,
+      joinedAt: member.joinedAt,
+      amount: Number(numerator / total),
+      remainder: numerator % total,
+    }
+  })
+  let remainder = amountKobo - shares.reduce((sum, share) => sum + share.amount, 0)
+  const recipients = [...shares].sort((a, b) =>
+    a.remainder === b.remainder
+      ? a.joinedAt - b.joinedAt || a.userId.localeCompare(b.userId)
+      : a.remainder > b.remainder ? -1 : 1,
+  )
+  for (let index = 0; remainder > 0; index += 1, remainder -= 1) {
+    recipients[index % recipients.length].amount += 1
+  }
+
+  return Object.fromEntries(shares.map(({ userId, amount }) => [userId, amount]))
 }
 
 /**
@@ -505,18 +505,19 @@ export function requestWithdrawal(
   pot: JointPot,
   requestingUserId: string,
   amountKobo: number,
-  reason?: string
+  reason?: string,
+  destination: WithdrawalRequest['destination'] = 'member_wallet',
 ): { request: WithdrawalRequest; updatedPot: JointPot } {
   const now = Date.now()
-  
-  // Find the requesting member
-  const requester = pot.members.find((m) => m.userId === requestingUserId)
+  const requester = pot.members.find((m) => m.userId === requestingUserId && !m.leftAt)
   if (!requester) {
     throw new Error('User is not a member of this pot')
   }
-  
-  // Check amount doesn't exceed balance (can never exceed pot balance)
-  const maxAllowed = pot.currentKobo - pot.feeKobo  // subtract fee
+  if (pot.closedAt) throw new Error('Cannot withdraw from a closed pot')
+  if (!Number.isSafeInteger(amountKobo) || amountKobo <= 0) {
+    throw new Error('Withdrawal amount must be a positive integer number of kobo')
+  }
+  const maxAllowed = pot.currentKobo - pot.feeKobo
   if (amountKobo > maxAllowed) {
     throw new Error(
       `Withdrawal amount exceeds available balance. ` +
@@ -524,34 +525,10 @@ export function requestWithdrawal(
       `Requested: ₦${koboToNaira(amountKobo)}`
     )
   }
-  
-  // Determine approval threshold based on rule
-  let approvalThreshold: { type: 'percentage' | 'count', value: number }
-  
-  switch (pot.approvalRule) {
-    case 'all':
-      approvalThreshold = { type: 'percentage', value: 100 }
-      break
-    case 'majority':
-      approvalThreshold = { type: 'percentage', value: 50 }
-      break
-    case 'owner_up_to_ngx':
-      // For owner-up-to-₦X, only the owner can approve any amount up to their limit
-      // We'll handle this specially - check if requester is owner
-      if (requester.userId !== pot.ownerUserId) {
-        // Non-owner requesting - need to check votes
-        approvalThreshold = { type: 'percentage', value: 50 } // majority
-      } else {
-        // Owner - can approve up to a limit (in real app, this would be a configured amount)
-        // For demo, owner can approve any amount up to balance
-        approvalThreshold = { type: 'none', value: 0 }
-      }
-      break
-    default:
-      approvalThreshold = { type: 'percentage', value: 50 } // default to majority
+  if (pot.approvalRule === 'owner_up_to_ngx' && amountKobo > (pot.ownerApprovalLimitKobo ?? 0)) {
+    throw new Error('Withdrawal amount exceeds the owner approval limit')
   }
-  
-  // Create the withdrawal request
+
   const request: WithdrawalRequest = {
     id: `withdrawal_${Date.now()}`,
     potId: pot.id,
@@ -561,29 +538,26 @@ export function requestWithdrawal(
     status: 'pending',
     votesYes: 0,
     votesNo: 0,
+    votesByUserId: {},
+    destination,
     createdAt: now,
     expiresAt: now + 72 * 60 * 60 * 1000,  // 72 hours
   }
-  
-  // Update the pot with the withdrawal request
-  const updatedPot = {
+  const notification: JointNotification = {
+    id: `notif_${now}`,
+    potId: pot.id,
+    type: 'withdrawal_request',
+    title: 'Withdrawal request',
+    body: `${koboToNaira(amountKobo)} requested for withdrawal`,
+    data: { requestId: request.id, amountKobo, reason, destination },
+    read: false,
+    createdAt: now,
+  }
+  const updatedPot: JointPot = {
     ...pot,
     withdrawalRequests: [...pot.withdrawalRequests, request],
-    notifications: [
-      ...pot.notifications,
-      {
-        id: `notif_${Date.now()}`,
-        potId: pot.id,
-        type: 'withdrawal_request',
-        title: 'Withdrawal request',
-        body: `${koboToNaira(amountKobo)} requested for withdrawal`,
-        data: { requestId: request.id, amountKobo, reason },
-        read: false,
-        createdAt: now,
-      },
-    ],
+    notifications: [...pot.notifications, notification],
   }
-  
   return { request, updatedPot }
 }
 
@@ -603,98 +577,105 @@ export function voteOnWithdrawal(
   vote: Vote
 ): { updatedPot: JointPot; yesVotes: number; noVotes: number; thresholdMet: boolean } {
   const now = Date.now()
-  
-  // Find the withdrawal request
   const requestIndex = pot.withdrawalRequests.findIndex(
     (r) => r.id === withdrawalRequestId
   )
-  
   if (requestIndex === -1) {
     throw new Error('Withdrawal request not found')
   }
-  
   const request = pot.withdrawalRequests[requestIndex]
-  
-  // Check if request has expired
-  if (now > request.expiresAt) {
-    // Mark as expired
+  const activeMembers = pot.members.filter((member) => !member.leftAt)
+  const voter = activeMembers.find((member) => member.userId === voterUserId)
+  if (!voter) throw new Error('Only active pot members can vote')
+
+  if (request.status !== 'pending') {
+    throw new Error('This withdrawal request is no longer pending')
+  }
+  if (now >= request.expiresAt) {
+    const updatedRequest = { ...request, status: 'expired' as const }
     const updatedRequests = [...pot.withdrawalRequests]
-    updatedRequests[requestIndex].status = 'expired'
-    return { updatedPot: { ...pot, withdrawalRequests: updatedRequests }, yesVotes: 0, noVotes: 0, thresholdMet: false }
+    updatedRequests[requestIndex] = updatedRequest
+    return {
+      updatedPot: { ...pot, withdrawalRequests: updatedRequests },
+      yesVotes: request.votesYes,
+      noVotes: request.votesNo,
+      thresholdMet: false,
+    }
   }
-  
-  // Add the vote
-  const updatedRequests = [...pot.withdrawalRequests]
-  const existingVoteIndex = updatedRequests[requestIndex].votesYes > 0 
-    ? // Check if user already voted - simplified: just increment
-      requestIndex 
-    : requestIndex
-  
-  // Increment the appropriate vote count
-  const updatedRequest = {
-    ...updatedRequests[requestIndex],
+  if (request.votesByUserId?.[voterUserId]) {
+    throw new Error('Each member may vote only once per withdrawal request')
   }
-  
-  if (vote === 'yes') {
-    updatedRequest.votesYes++
-  } else {
-    updatedRequest.votesNo++
+  if (pot.approvalRule === 'owner_up_to_ngx' && voterUserId !== pot.ownerUserId) {
+    throw new Error('Only the pot owner can vote under this approval rule')
   }
-  updatedRequests[requestIndex] = updatedRequest
-  
-  // Calculate threshold
-  const totalVotes = updatedRequest.votesYes + updatedRequest.votesNo
+
+  const votesByUserId = { ...request.votesByUserId, [voterUserId]: vote }
+  const yesVotes = Object.values(votesByUserId).filter((value) => value === 'yes').length
+  const noVotes = Object.values(votesByUserId).filter((value) => value === 'no').length
   let thresholdMet = false
-  let yesVotes = updatedRequest.votesYes
-  let noVotes = updatedRequest.votesNo
-  
+  let rejected = false
   switch (pot.approvalRule) {
     case 'all':
-      // All members must approve
-      // Check if all non-owner members have voted yes
-      // For simplicity: if yesVotes equals total active members
-      const activeMembers = pot.members.length
-      thresholdMet = yesVotes >= activeMembers && noVotes === 0
+      thresholdMet = yesVotes === activeMembers.length
+      rejected = noVotes > 0
       break
-      
     case 'majority':
-      // Majority approve (default)
-      // More than 50% of votes must be yes
-      // If totalVotes > 0: yesVotes > totalVotes / 2
-      // Handle ties: earliest vote wins
-      thresholdMet = yesVotes > Math.floor(totalVotes / 2)
-      if (!thresholdMet && yesVotes === noVotes && totalVotes > 0) {
-        // Tie: earliest vote wins - simplified, we'll say no for tie
-        thresholdMet = false
-      }
+      thresholdMet = yesVotes >= Math.floor(activeMembers.length / 2) + 1
+      rejected = noVotes >= Math.floor(activeMembers.length / 2) + 1
       break
-      
     case 'owner_up_to_ngx':
-      // Only the owner can approve, and up to a limit
-      // For demo: if owner has voted yes and no other votes against
-      const isOwner = voterUserId === pot.ownerUserId
-      if (isOwner && yesVotes > 0 && noVotes === 0) {
-        thresholdMet = true
-      }
+      thresholdMet = votesByUserId[pot.ownerUserId] === 'yes'
+      rejected = votesByUserId[pot.ownerUserId] === 'no'
       break
   }
-  
-  // Update the request in the pot
+
+  const updatedRequest: WithdrawalRequest = {
+    ...request,
+    votesByUserId,
+    votesYes: yesVotes,
+    votesNo: noVotes,
+    status: thresholdMet ? 'approved' : rejected ? 'rejected' : 'pending',
+    approvedAt: thresholdMet ? now : undefined,
+  }
   const updatedRequests = [...pot.withdrawalRequests]
   updatedRequests[requestIndex] = updatedRequest
-  
-  // Update the pot
-  const updatedPot = {
+  let members = pot.members
+  let currentKobo = pot.currentKobo
+  if (thresholdMet) {
+    const debitKobo = request.amountKobo + pot.feeKobo
+    const activeShares = allocateProportionally(
+      debitKobo,
+      activeMembers.map((member) => ({
+        userId: member.userId,
+        weightKobo: member.contributionKobo,
+        joinedAt: member.joinedAt,
+      })),
+    )
+    members = pot.members.map((member) => {
+      const newContribution = member.contributionKobo - (activeShares[member.userId] ?? 0)
+      if (newContribution < 0) throw new Error('Withdrawal exceeds member net contributions')
+      return { ...member, contributionKobo: newContribution }
+    })
+    currentKobo = subtractKobo(currentKobo, debitKobo)
+  }
+  const notification: JointNotification = {
+    id: `notif_${now}`,
+    potId: pot.id,
+    type: 'withdrawal_vote',
+    title: thresholdMet ? 'Withdrawal approved' : rejected ? 'Withdrawal rejected' : 'Withdrawal vote recorded',
+    body: `${yesVotes} yes, ${noVotes} no`,
+    data: { requestId: request.id, voterUserId, vote },
+    read: false,
+    createdAt: now,
+  }
+  const updatedPot: JointPot = {
     ...pot,
+    currentKobo,
+    members,
     withdrawalRequests: updatedRequests,
+    notifications: [...pot.notifications, notification],
   }
-  
-  return {
-    updatedPot,
-    yesVotes: updatedRequest.votesYes,
-    noVotes: updatedRequest.votesNo,
-    thresholdMet,
-  }
+  return { updatedPot, yesVotes, noVotes, thresholdMet }
 }
 
 /**
@@ -708,142 +689,74 @@ export function voteOnWithdrawal(
  */
 export function closeJointPot(
   pot: JointPot,
-  ownerUserId: string
-): { distributedMembers: JointPotMember[]; totalDistributedKobo: number; roundingRemainderKobo: number } {
-  // Validate owner
+  ownerUserId: string,
+  confirmedMemberUserIds: string[],
+): {
+  distributedMembers: JointPotMember[]
+  payouts: Array<{ userId: string; amountKobo: number }>
+  totalDistributedKobo: number
+  roundingRemainderKobo: number
+  updatedPot: JointPot
+} {
   if (pot.ownerUserId !== ownerUserId) {
     throw new Error('Only the pot owner can close the pot')
   }
-  
-  // Check that all members have confirmed
-  // In a real app, this would require a confirmation flow
-  // For demo: assume all members have confirmed if we get here
-  
-  // Calculate net contributions for each member
-  // and distribute the balance proportionally
-  
+  if (pot.closedAt) throw new Error('This pot is already closed')
+  if (pot.withdrawalRequests.some((request) => request.status === 'pending')) {
+    throw new Error('Resolve pending withdrawal requests before closing this pot')
+  }
+  const activeMembers = pot.members.filter((member) => !member.leftAt)
+  const confirmations = new Set(confirmedMemberUserIds)
+  if (activeMembers.some((member) => !confirmations.has(member.userId))) {
+    throw new Error('Every active member must confirm before the pot can close')
+  }
+
   const now = Date.now()
-  const totalBalance = pot.currentKobo - pot.feeKobo  // subtract fee
-  
-  // Get each member's net contributions
-  const memberNetContributions: { userId: string; netKobo: number; member: JointPotMember }[] = []
-  
-  for (const member of pot.members) {
-    // Get all contributions by this member
-    const memberContributions = pot.contributions.filter(
-      (c) => c.userId === member.userId
-    )
-    
-    const totalContributed = memberContributions.reduce(
-      (sum, c) => addKobo(sum, c.amountKobo),
-      0
-    )
-    
-    // Net = contributed - but we need to figure out their share
-    // For closing: distribute full balance proportionally to net contributions
-    memberNetContributions.push({
+  const totalBalance = pot.currentKobo
+  const shares = allocateProportionally(
+    totalBalance,
+    activeMembers.map((member) => ({
       userId: member.userId,
-      netKobo: totalContributed,
-      member,
-    })
-  }
-  
-  // Calculate total net contributions across all members
-  const totalNetContributions = memberNetContributions.reduce(
-    (sum, m) => addKobo(sum, m.netKobo),
-    0
-  )
-  
-  // Distribute balance proportionally
-  let totalDistributedKobo = 0
-  const distributedMembers: JointPotMember[] = []
-  
-  for (const { userId, netKobo, member } of memberNetContributions) {
-    if (totalNetContributions > 0) {
-      // Proportional share: (member's net / total net) * total balance
-      const share = Math.round(
-        (divideKoboMultiplyTotal(netKobo, totalNetContributions, totalBalance) / 100) * 100
-      )
-      totalDistributedKobo = addKobo(totalDistributedKobo, share)
-      distributedMembers.push({
-        ...member,
-        contributionKobo: share,  // This becomes their final share
-      })
-    } else {
-      // No contributions, divide equally
-      const equalShare = Math.round(totalBalance / pot.members.length)
-      totalDistributedKobo = addKobo(totalDistributedKobo, equalShare)
-      distributedMembers.push({
-        ...member,
-        contributionKobo: equalShare,
-      })
-    }
-  }
-  
-  // Calculate rounding remainder (ensure no kobo lost or created)
-  // The deterministic rule: remainder goes to the member with the smallest net contribution
-  // If tie, goes to the member who joined earliest
-  const roundingRemainderKobo = subtractKobo(totalBalance, totalDistributedKobo)
-  
-  if (roundingRemainderKobo !== 0) {
-    // Find member with smallest net contribution (or earliest join if tie)
-    let smallestNet = Infinity
-    let earliestJoin = Infinity
-    let remainderRecipientIndex = -1
-    
-    memberNetContributions.forEach((item, index) => {
-      const { netKobo, member } = item
-      const joinTime = member.joinedAt
-      if (netKobo < smallestNet || (netKobo === smallestNet && joinTime < earliestJoin)) {
-        smallestNet = netKobo
-        earliestJoin = joinTime
-        remainderRecipientIndex = index
-      }
-    })
-    
-    if (remainderRecipientIndex >= 0) {
-      const recipient = distributedMembers[remainderRecipientIndex]
-      distributedMembers[remainderRecipientIndex] = {
-        ...recipient,
-        contributionKobo: addKobo(recipient.contributionKobo, roundingRemainderKobo),
-      }
-      totalDistributedKobo = addKobo(totalDistributedKobo, roundingRemainderKobo)
-    }
-  }
-  
-  // Mark all members as having left (pot is closing)
-  const closedMembers = pot.members.map((member) => ({
-    ...member,
-    leftAt: now,
-    leftReason: 'pot_closed',
-  }))
-  
-  // Final distributed pot
-  const finalPot = {
-    ...pot,
-    currentKobo: 0,  // Full balance distributed
-    members: closedMembers.map((m, i) => ({
-      ...m,
-      contributionKobo: distributedMembers[i].contributionKobo,
+      weightKobo: member.contributionKobo,
+      joinedAt: member.joinedAt,
     })),
-    contributions: [],
-    withdrawalRequests: [],
-    notifications: [
-      ...pot.notifications,
-      {
-        id: `notif_${Date.now()}`,
-        potId: pot.id,
-        type: 'pot_closed',
-        title: 'Pot closed',
-        body: `Pot "${pot.name}" closed. Balance distributed proportionally.`,
-        data: { totalBalanceKobo: totalBalance, totalDistributedKobo },
-        read: false,
-        createdAt: now,
-      },
-    ],
+  )
+  const payouts = activeMembers.map((member) => ({
+    userId: member.userId,
+    amountKobo: shares[member.userId] ?? 0,
+  }))
+  const totalDistributedKobo = payouts.reduce((sum, payout) => sum + payout.amountKobo, 0)
+  const roundingRemainderKobo = totalBalance - totalDistributedKobo
+  if (roundingRemainderKobo !== 0) {
+    throw new Error('Pot distribution did not preserve the full balance')
   }
-  
-  return { distributedMembers, totalDistributedKobo, roundingRemainderKobo }
+  const distributedMembers = activeMembers.map((member) => ({
+    ...member,
+    contributionKobo: shares[member.userId] ?? 0,
+  }))
+  const notification: JointNotification = {
+    id: `notif_${now}`,
+    potId: pot.id,
+    type: 'pot_closed',
+    title: 'Pot closed',
+    body: `Pot "${pot.name}" closed. The full balance was distributed proportionally.`,
+    data: { totalBalanceKobo: totalBalance, totalDistributedKobo },
+    read: false,
+    createdAt: now,
+  }
+  const updatedPot: JointPot = {
+    ...pot,
+    currentKobo: 0,
+    closedAt: now,
+    members: pot.members.map((member) => ({
+      ...member,
+      contributionKobo: 0,
+      leftAt: member.leftAt ?? now,
+      leftReason: member.leftReason ?? 'pot_closed',
+    })),
+    notifications: [...pot.notifications, notification],
+  }
+  return { distributedMembers, payouts, totalDistributedKobo, roundingRemainderKobo, updatedPot }
 }
 
 /**
@@ -860,7 +773,8 @@ export function examplePot3PersonMajority(): JointPot {
     'majority', // majority approval
     'owner_1', // owner
     5, // max 5 members
-    0 // no fee
+    0, // no fee
+    nairaToKobo(50000),
   )
   
   // Add 3 members
