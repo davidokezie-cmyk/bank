@@ -64,8 +64,9 @@ html.dark {
   }
 }
 
+/* Body inherits Sora/Inter from html element set by next/font */
 body {
-  font-family: 'Sora', system-ui, -apple-system, sans-serif;
+  font-feature-settings: 'tnum';
   -webkit-font-smoothing: antialiased;
   -moz-os-font-smoothing: antialiased;
 }
