@@ -5,6 +5,7 @@ import {
   validateSalarySplitPercentages,
   formatAmount,
 } from '@/lib/validation'
+import { nairaToKobo } from '@/lib/money'
 
 describe('NUBAN & Nigerian Phone Validation', () => {
   describe('validateNuban', () => {
