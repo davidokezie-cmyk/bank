@@ -1,491 +1,181 @@
-/* eslint-disable */
-import { useEffect } from 'react'
-import { useReducedMotion } from 'framer-motion'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useState } from 'react'
-import { KoboProcedural } from '@/components/three/KoboProcedural'
-import { KoboFallback } from '@/components/three/KoboFallback'
-import { triggerMoneyConfirmation } from '@/components/ui/toast/Toast'
-import { cn } from '@/lib/utils'
+import Link from "next/link";
 
-/**
- * Dashboard - Wealth overview and quick actions.
- * 
- * Features:
- * - Koba block-stack progress showing goal contribution
- * - Available to Spend vs Available to Save/Invest cards
- * - Quick actions: Send, Save, Joint Savings, Goals
- * - Recent transactions list
- * - Pending joint pot invites/votes badge
- * - Demo mode indicator
- * - Every money flow has validation, confirm step, loading, success (Koba celebrate + aria-live), error, empty states
- */
+const balances = [
+  { label: "Available to spend", amount: "₦84,750", note: "Ready for everyday life", tone: "spend" },
+  { label: "Savings balance", amount: "₦52,300", note: "Kept separate from investments", tone: "save" },
+];
 
-export default function Dashboard() {
-  const reducedMotion = useReducedMotion()
-  const [showKoba, setShowKoba] = useState(true)
-  const [activeSection, setActiveSection] = useState('overview')
+const goals = [
+  { name: "Lagos rent", saved: "₦720,000", target: "₦1,000,000", progress: 72, color: "gold" },
+  { name: "A little getaway", saved: "₦180,000", target: "₦450,000", progress: 40, color: "violet" },
+];
 
-  // Check for demo mode
-  useEffect(() => {
-    const checkDemoMode = () => {
-      const cookie = document.cookie.replace(/(?:(?:^|.*)\demo-mode\s*=\s*([^;]*).*$)|^.*$/, '$1')
-      if (cookie === 'true') {
-        // Demo mode is active
-      }
-    }
-    checkDemoMode()
-  }, [])
+const activity = [
+  { title: "Salary split", description: "Monthly allocation · Today", amount: "+₦25,000", kind: "positive" },
+  { title: "Shop & Save", description: "Market purchase · Yesterday", amount: "+₦2,000 saved", kind: "positive" },
+  { title: "Lagos Rent Fund", description: "Joint pot contribution · 2 days ago", amount: "₦15,000", kind: "neutral" },
+];
 
-  // Koba contribution celebration
-  const celebrateContribution = () => {
-    triggerMoneyConfirmation('₦2,000 contributed')
-  }
-
-  // Sample data for demo
-  const availableSpend = 75000 // ₦750
-  const availableSave = 30000 // ₦300
-  const pendingInvites = 2
-  const pendingVotes = 1
-
+function ArrowIcon() {
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-[var(--text)]">
-              Dashboard
-            </h1>
-            <p className="text-[var(--muted)] text-sm">
-              Welcome back
-            </p>
-          </div>
-
-          {/* Demo mode indicator */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--surface)]/50 text-xs">
-            <span className="text-[var(--alert-coral)] font-medium">
-              Demo mode — no real money moves
-            </span>
-          </div>
-        </header>
-
-        {/* Koba Mascot */}
-        <div className="mb-6">
-          {reducedMotion ? (
-            <KoboFallback mood="idle" reducedMotion={true} />
-          ) : (
-            <KoboProcedural />
-          )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="reveal p-4 rounded-xl bg-[var(--raised)]">
-            <p className="text-[var(--muted)] text-sm mb-1">Available to Spend</p>
-            <p className="text-2xl font-bold text-[var(--gold)]">{koboToNaira(availableSpend)}</p>
-          </div>
-          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style="animation-delay: 0.1s;">
-            <p className="text-[var(--muted)] text-sm mb-1">Available to Save</p>
-            <p className="text-2xl font-bold text-[var(--green-growth)]">{koboToNaira(availableSave)}</p>
-          </div>
-          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style="animation-delay: 0.2s;">
-            <p className="text-[var(--muted)] text-sm mb-1">Joint Pots</p>
-            <p className="text-[var(--gold)] font-medium">{pendingInvites} pending invites</p>
-          </div>
-          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style="animation-delay: 0.3s;">
-            <p className="text-[var(--muted)] text-sm mb-1">Votes</p>
-            <p className="text-[var(--green-growth)] font-medium">{pendingVotes} pending</p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {/* Save & Allocate */}
-          <div
-            onClick={() => setActiveSection('save')}
-            className="reveal p-6 rounded-xl bg-[var(--raised)] hover:bg-[var(--surface)] transition-all cursor-pointer"
-            role="button"
-            aria-label="Save & Allocate"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-xl bg-[var(--accent-violet)] flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="h-6 w-6 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 12l-6-6 1.41-1.41L10 13.17l7.08-7.08L18 7l-6 6z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-[var(--text)]">Save & Allocate</h3>
-                <p className="text-[var(--muted)] text-sm">
-                  Set up salary split and Shop & Save rules
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Joint Savings */}
-          <div
-            onClick={() => setActiveSection('joint')}
-            className="reveal p-6 rounded-xl bg-[var(--raised)] hover:bg-[var(--surface)] transition-all cursor-pointer"
-            role="button"
-            aria-label="Joint Savings"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-xl bg-[var(--gold)] flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="h-6 w-6 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 12l-6-6 1.41-1.41L10 13.17l7.08-7.08L18 7l-6 6z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-[var(--text)]">Joint Savings</h3>
-                <p className="text-[var(--muted)] text-sm">
-                  Save together toward shared goals
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Send Money */}
-          <div
-            onClick={() => setActiveSection('send')}
-            className="reveal p-6 rounded-xl bg-[var(--raised)] hover:bg-[var(--surface)] transition-all cursor-pointer"
-            role="button"
-            aria-label="Send Money"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-xl bg-[var(--green-growth)] flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="h-6 w-6 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M8 16l4-4 4 4-4 4zm0 12l-4-4 4-4 4 4zm-4-4v8c3.31 0 6-2.69 6-6l0-2c0-3.31-2.69-6-6-6s-6 2.69-6 6l0 2c0 3.31 2.69 6 6 6z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-[var(--text)]">Send Money</h3>
-                <p className="text-[var(--muted)] text-sm">
-                  Send to friends and family
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Goals */}
-          <div
-            onClick={() => setActiveSection('goals')}
-            className="reveal p-6 rounded-xl bg-[var(--raised)] hover:bg-[var(--surface)] transition-all cursor-pointer"
-            role="button"
-            aria-label="Goals"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-xl bg-[var(--gold)] flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="h-6 w-6 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 12l-6-6 1.41-1.41L10 13.17l7.08-7.08L18 7l-6 6z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-[var(--text)]">Goals</h3>
-                <p className="text-[var(--muted)] text-sm">
-                  Lifestyle goals progress
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Withdraw */}
-          <div
-            onClick={() => setActiveSection('withdraw')}
-            className="reveal p-6 rounded-xl bg-[var(--raised)] hover:bg-[var(--surface)] transition-all cursor-pointer"
-            role="button"
-            aria-label="Withdraw"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-xl bg-[var(--alert-coral)] flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="h-6 w-6 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M5 3h14v2H5V3zm0 4h14v2H5V7zm0 4h14v2H5V11zm4-4h6v2h-6V7zm4-4h2v2h-2V3z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-medium text-[var(--text)]">Withdraw</h3>
-                <p className="text-[var(--muted)] text-sm">
-                  Pot withdrawals with voting
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Page Content based on active section */}
-      <section className="pt-6">
-        {activeSection === 'save' && (
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-[var(--text)] mb-4">Save & Allocate</h2>
-            <p className="text-[var(--muted)] mb-6">
-              Set up your salary split and Shop & Save rules.
-            </p>
-            
-            {/* Salary Split Summary */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] mb-4">
-              <h3 className="font-medium text-[var(--text)] mb-2">Salary Split Summary</h3>
-              <p className="text-[var(--muted)]">
-                Your income is split across Spending, Savings, and Goals. Total must equal 100%.
-              </p>
-            </div>
-
-            {/* Shop & Save Rules */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-              <h3 className="font-medium text-[var(--text)] mb-2">Shop & Save Rules</h3>
-              <p className="text-[var(--muted)] text-sm">
-                Enable rules to set aside money on eligible purchases. ₦40,000 @ 5% = ₦2,000.
-              </p>
-              <button
-                onClick={() => celebrateContribution()}
-                className="mt-2 w-full bg-[var(--accent-violet)] text-white py-2 rounded-md font-medium hover:bg-[var(--accent-indigo)] transition-colors"
-                aria-label="Add Shop & Save rule"
-              >
-                Add Shop & Save rule
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeSection === 'joint' && (
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-[var(--text)] mb-4">Joint Savings</h2>
-            <p className="text-[var(--muted)] mb-6">
-              Save together toward shared goals.
-            </p>
-            
-            {/* Your Pots */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] mb-4">
-              <h3 className="font-medium text-[var(--text)] mb-2">Your Pots</h3>
-              <p className="text-[var(--muted)] text-sm">
-                • Lagos Rent Fund (majority approval) - ₦75,000 total
-                • Zanzibar Trip (owner-up-to-₦50,000) - ₦150,000 total
-              </p>
-            </div>
-
-            {/* Pending invites */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-              <h3 className="font-medium text-[var(--text)] mb-2">Pending Invites (2)</h3>
-              <p className="text-[var(--muted)] text-sm">
-                • 3-person Lagos Rent Fund - awaiting acceptance
-                • 2-person Zanzibar Trip - new invitation
-              </p>
-            </div>
-
-            {/* Quick actions */}
-            <div className="pt-4 border-t border-[var(--border)]">
-              <button
-                onClick={() => celebrateContribution()}
-                className="w-full bg-[var(--accent-violet)] text-white py-2 rounded-md font-medium hover:bg-[var(--accent-indigo)] transition-colors"
-                aria-label="Contribute to pot"
-              >
-                Contribute to Lagos Rent Fund
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeSection === 'send' && (
-          <div className="max-w-md mx-auto">
-            <h2 className="text-2xl font-bold text-[var(--text)] mb-4">Send Money</h2>
-            <p className="text-[var(--muted)] mb-6">
-              Send money to friends and family.
-            </p>
-            
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--text)] mb-2">
-                  Recipient
-                </label>
-                <input
-                  type="text"
-                  placeholder="username or phone"
-                  className="w-full rounded-md px-4 py-2 border border-[var(--border)] bg-[var(--ink)] text-[var(--text)] focus:border-[var(--accent-violet)] transition-colors"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[var(--text)] mb-2">
-                  Amount (₦)
-                </label>
-                <input
-                  type="number"
-                  placeholder="1000"
-                  className="w-full rounded-md px-4 py-2 border border-[var(--border)] bg-[var(--ink)] text-[var(--text)] focus:border-[var(--accent-violet)] transition-colors"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[var(--text)] mb-2">
-                  Reason (optional)
-                </label>
-                <textarea
-                  rows="2"
-                  className="w-full rounded-md px-4 py-2 border border-[var(--border)] bg-[var(--ink)] text-[var(--text)] focus:border-[var(--accent-violet)] transition-colors"
-                  placeholder="e.g. paying back a friend"
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-[var(--accent-violet)] text-white py-3 rounded-md font-medium hover:bg-[var(--accent-indigo)] transition-colors"
-                aria-label="Send money"
-                disabled>
-                  <span className="hidden">Send</span>
-                  <svg
-                    className="h-5 w-5 mr-2 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v0a8 8 0 01-8 8zm0 0L3 4a5 5 0 00-5 5v0a5 5 0 005 5h2v7h7v-5H3zm9-3v-2c0-3.87 1.65-7.5 4-9.5S15 6.12 15 10v2c0 2.87 1.12 5.5 3 7.5-2 1-3-2-3-7.5zm4 12c-1.66 0-3 1.34-3 3v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3zm-8 4c-1.66 0-3 1.34-3 3v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3zm12-4c-1.66 0-3 1.34-3 3v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3z"
-                    />
-                  </svg>
-                  Send
-                </button>
-              </form>
-            </div>
-          )}
-
-        {activeSection === 'goals' && (
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-[var(--text)] mb-4">Lifestyle Goals</h2>
-            <p className="text-[var(--muted)] mb-6">
-              Your lifestyle goals progress.
-            </p>
-            
-            {/* Goals overview */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-              <h3 className="font-medium text-[var(--text)] mb-2">Your Goals</h3>
-              <p className="text-[var(--muted)] text-sm">
-                • Rent goal: 40% of target
-                • Car goal: 15% of target
-                • Holiday goal: 10% of target
-              </p>
-            </div>
-
-            {/* Add goal CTA */}
-            <div className="pt-4">
-              <button
-                className="w-full bg-[var(--accent-violet)] text-white py-3 rounded-md font-medium hover:bg-[var(--accent-indigo)] transition-colors"
-                aria-label="Add a new goal"
-              >
-                Add Your First Goal
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeSection === 'withdraw' && (
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-[var(--text)] mb-4">Withdraw from Pot</h2>
-            <p className="text-[var(--muted)] mb-6">
-              Request a withdrawal from a joint pot. Votes needed and 72-hour expiry apply.
-            </p>
-            
-            {/* Pending withdrawal */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] mb-4">
-              <h3 className="font-medium text-[var(--text)] mb-2">Pending Withdrawal</h3>
-              <p className="text-[var(--muted)] text-sm">
-                ₦20,000 requested for paying rent — 1 of 3 votes needed • 48 hours remaining
-              </p>
-            </div>
-
-            {/* Withdrawal form */}
-            <form className="space-y-4">
-              <input
-                type="hidden"
-                value="20000"
-                name="amount"
-                defaultValue="20000"
-              />
-              <div>
-                <label className="block text-sm font-medium text-[var(--text)] mb-2">
-                  Reason (optional)
-                </label>
-                <textarea
-                  rows="2"
-                  className="w-full rounded-md px-4 py-2 border border-[var(--border)] bg-[var(--ink)] text-[var(--text)] focus:border-[var(--accent-violet)] transition-colors"
-                  placeholder="e.g. paying rent"
-                ></textarea>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="flex-1 bg-[var(--alert-coral)] text-white py-2 rounded-md font-medium hover:bg-[var(--alert-coral-dark)] transition-colors"
-                  aria-label="Request withdrawal"
-                  disabled>
-                  <span className="hidden">Request</span>
-                  <svg
-                    className="h-4 w-5 mr-2 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v0a8 8 0 01-8 8zm0 0L3 4a5 5 0 00-5 5v0a5 5 0 005 5h2v7h7v-5H3zm9-3v-2c0-3.87 1.65-7.5 4-9.5S15 6.12 15 10v2c0 2.87 1.12 5.5 3 7.5-2 1-3-2-3-7.5zm4 12c-1.66 0-3 1.34-3 3v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3zm-8 4c-1.66 0-3 1.34-3 3v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3zm12-4c-1.66 0-3 1.34-3 3v2c0 1.66 1.34 3 3 3s3-1.34 3-3v-2c0-1.66-1.34-3-3-3z"
-                    />
-                  </svg>
-                  Request
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-      </section>
-    </main>
-  )
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.7">
+      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
-/* eslint-enable */
+function TrendIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.7">
+      <path d="m4 16 5-5 4 3 7-8M14 6h6v6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-function koboToNaira(kobo: number): string {
-  return Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-    maximumFractionDigits: 0,
-  }).format(kobo / 100)
+export default function DashboardPage() {
+  return (
+    <main className="min-h-screen bg-[#0b0a14] text-[#f4f3ff]">
+      <div className="mx-auto grid min-h-screen max-w-[1440px] lg:grid-cols-[244px_minmax(0,1fr)]">
+        <aside className="hidden border-r border-white/[0.07] bg-[#0f0d19] px-5 py-7 lg:flex lg:flex-col">
+          <Link href="/" className="flex items-center gap-3" aria-label="Buy & Build home">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#f7d07a,#8b5cf6)] shadow-[0_0_26px_rgba(244,182,73,0.2)]">
+              <span className="h-5 w-5 rounded-full border-2 border-[#17111c]" />
+            </span>
+            <span>
+              <span className="block text-xs font-bold uppercase tracking-[0.12em]">Buy & Build</span>
+              <span className="mt-0.5 block text-[11px] text-[#a5a3c4]">Your money, your life</span>
+            </span>
+          </Link>
+
+          <p className="mb-3 mt-12 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#77748f]">Workspace</p>
+          <nav aria-label="App navigation" className="space-y-1">
+            <a href="#overview" className="flex min-h-11 items-center gap-3 rounded-xl bg-[#211d38] px-3 text-sm font-medium text-white">
+              <span aria-hidden="true" className="text-[#f7d07a]">◈</span> Overview
+            </a>
+            <a href="#goals" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-[#aaa7c1] transition hover:bg-white/5 hover:text-white">
+              <span aria-hidden="true">◇</span> Goals
+            </a>
+            <a href="#activity" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-[#aaa7c1] transition hover:bg-white/5 hover:text-white">
+              <span aria-hidden="true">↗</span> Activity
+            </a>
+          </nav>
+
+          <div className="mt-auto rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4">
+            <div className="flex items-center gap-2 text-xs font-medium text-[#f7d07a]">
+              <span className="h-2 w-2 rounded-full bg-[#f7d07a]" /> Demo space
+            </div>
+            <p className="mt-2 text-xs leading-5 text-[#aaa7c1]">Explore the experience with sample figures. No real money moves.</p>
+            <Link href="/" className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-white hover:text-[#f7d07a]">
+              Back to website <ArrowIcon />
+            </Link>
+          </div>
+        </aside>
+
+        <div className="min-w-0 px-4 pb-10 pt-5 sm:px-7 lg:px-10 lg:py-8">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-7 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#f7d07a]/20 bg-[#f7d07a]/[0.06] px-4 py-3">
+              <p className="flex items-center gap-2 text-xs font-medium text-[#f6e5bb] sm:text-sm">
+                <span className="h-2 w-2 rounded-full bg-[#f7d07a]" /> Demo mode — no real money moves
+              </p>
+              <span className="text-xs text-[#b9b5d8]">Sample account · Figures are illustrative</span>
+            </div>
+
+            <header id="overview" className="mb-8 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#b8a1ff]">Monday, 9 November</p>
+                <h1 className="mt-2 font-[var(--font-sora)] text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Your money, in balance.</h1>
+                <p className="mt-2 text-sm text-[#aaa7c1]">A clear view of today and the life you’re building.</p>
+              </div>
+              <Link href="/login" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white transition hover:border-[#8b5cf6]/50">
+                Alex’s demo profile <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2c2548] text-xs text-[#f7d07a]">A</span>
+              </Link>
+            </header>
+
+            <section aria-label="Money overview" className="grid gap-4 sm:grid-cols-2">
+              {balances.map((balance) => (
+                <article key={balance.label} className={`relative overflow-hidden rounded-[26px] border p-5 sm:p-6 ${balance.tone === "spend" ? "border-[#8b5cf6]/25 bg-[linear-gradient(135deg,rgba(139,92,246,0.16),rgba(22,20,39,0.94))]" : "border-[#2ed7a4]/20 bg-[linear-gradient(135deg,rgba(46,215,164,0.09),rgba(22,20,39,0.94))]"}`}>
+                  <div className="relative z-10 flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm text-[#c2bfd5]">{balance.label}</p>
+                      <p className="money mt-4 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">{balance.amount}</p>
+                      <p className="mt-2 text-xs text-[#aaa7c1]">{balance.note}</p>
+                    </div>
+                    <span className={`rounded-xl p-2.5 ${balance.tone === "spend" ? "bg-[#8b5cf6]/15 text-[#c5b5ff]" : "bg-[#2ed7a4]/10 text-[#7ce2c0]"}`}><TrendIcon /></span>
+                  </div>
+                </article>
+              ))}
+            </section>
+
+            <section className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+              <div id="goals" className="rounded-[26px] border border-white/[0.08] bg-[#14121f] p-5 sm:p-6">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f7d07a]">Little by little</p>
+                    <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em]">Your goals</h2>
+                  </div>
+                  <span className="text-xs text-[#aaa7c1]">Savings goals only</span>
+                </div>
+                <div className="mt-6 space-y-6">
+                  {goals.map((goal) => (
+                    <div key={goal.name}>
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium text-white">{goal.name}</p>
+                          <p className="mt-1 text-xs text-[#aaa7c1]">{goal.saved} <span className="text-[#77748f]">of {goal.target}</span></p>
+                        </div>
+                        <span className="money text-sm font-semibold text-[#dedaf3]">{goal.progress}%</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-white/[0.07]" role="progressbar" aria-label={`${goal.name} progress`} aria-valuenow={goal.progress} aria-valuemin={0} aria-valuemax={100}>
+                        <div className={`h-full rounded-full ${goal.color === "gold" ? "bg-[linear-gradient(90deg,#f5b83d,#f7d07a)]" : "bg-[linear-gradient(90deg,#8b5cf6,#b6a2ff)]"}`} style={{ width: `${goal.progress}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-6 border-t border-white/[0.07] pt-4 text-xs leading-5 text-[#aaa7c1]">Savings and investments are shown separately. Investment values may change and are not guaranteed.</p>
+              </div>
+
+              <aside className="relative overflow-hidden rounded-[26px] border border-[#8b5cf6]/20 bg-[linear-gradient(155deg,#201a39,#151321_68%)] p-5 sm:p-6" aria-label="Kobo mascot and tip">
+                <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#8b5cf6]/15 blur-3xl" />
+                <div className="relative flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f7d07a]">A note from Kobo</p>
+                    <h2 className="mt-2 text-lg font-semibold">Small steps add up.</h2>
+                  </div>
+                  <div className="kobo-mini" aria-hidden="true"><span className="kobo-mini-eye left" /><span className="kobo-mini-eye right" /><span className="kobo-mini-smile" /></div>
+                </div>
+                <p className="relative mt-5 text-sm leading-6 text-[#c2bfd5]">Your Shop & Save example: a ₦40,000 purchase with your 5% rule would set aside ₦2,000 as a separate contribution.</p>
+                <p className="relative mt-4 rounded-xl border border-white/[0.08] bg-black/10 px-3 py-2 text-xs leading-5 text-[#aaa7c1]">Only enable purchase-linked contributions with your explicit opt-in. You can pause or change a rule any time.</p>
+              </aside>
+            </section>
+
+            <section id="activity" className="mt-6 rounded-[26px] border border-white/[0.08] bg-[#14121f] p-5 sm:p-6">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b8a1ff]">The latest</p>
+                  <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em]">Recent activity</h2>
+                </div>
+                <span className="rounded-full border border-white/[0.08] px-3 py-1 text-[11px] text-[#aaa7c1]">Sample activity</span>
+              </div>
+              <ul className="divide-y divide-white/[0.07]">
+                {activity.map((item) => (
+                  <li key={item.title} className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-2 last:pb-1">
+                    <div className="flex items-center gap-3">
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm ${item.kind === "positive" ? "bg-[#2ed7a4]/10 text-[#7ce2c0]" : "bg-[#f7d07a]/10 text-[#f7d07a]"}`} aria-hidden="true">{item.kind === "positive" ? "↗" : "◈"}</span>
+                      <div><p className="text-sm font-medium text-white">{item.title}</p><p className="mt-1 text-xs text-[#8f8ca6]">{item.description}</p></div>
+                    </div>
+                    <span className="money text-sm font-medium text-[#d8d5e8]">{item.amount}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-5 text-xs text-[#8f8ca6]">
+              <span>Buy & Build is a demo experience. No real money moves.</span>
+              <Link href="/" className="text-[#c2bfd5] hover:text-white">How your money is handled</Link>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
 }
