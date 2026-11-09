@@ -1,270 +1,183 @@
 import Link from "next/link";
 
-const stats = [
-  { label: "members growing", value: "18.4k" },
-  { label: "avg. save rate", value: "31%" },
-  { label: "joint pots created", value: "6.2k" },
-];
-
 const features = [
   {
-    title: "Salary Split",
-    description:
-      "Divide each paycheck across spending, savings, and named lifestyle goals with totals locked to 100%.",
-    accent: "Spend with clarity",
+    number: "01",
+    title: "Split your income",
+    text: "Give spending, savings, and each named goal a clear share. Your split adds up to exactly 100%.",
+    detail: "Salary Split",
   },
   {
-    title: "Shop & Save",
-    description:
-      "Turn a qualifying purchase into a separate contribution with fixed, percentage, or round-up rules.",
-    accent: "₦40,000 @ 5% = ₦2,000",
+    number: "02",
+    title: "Save as you shop",
+    text: "Choose a fixed amount, percentage, or round-up. Contributions stay separate and always need your opt-in.",
+    detail: "Shop & Save",
   },
   {
-    title: "Lifestyle Goals",
-    description:
-      "Track rent, travel, education, business, and everything in between with deadline-driven progress.",
-    accent: "Built around real life",
+    number: "03",
+    title: "Make room for goals",
+    text: "Track progress toward the things you care about, from rent and education to a well-earned trip.",
+    detail: "Lifestyle Goals",
   },
-];
-
-const highlights = [
-  "Clear savings vs. investing separation",
-  "Joint pots with approvals, voting, and refunds",
-  "Demo mode with explicit opt-in before every money action",
 ];
 
 const faqs = [
   {
-    question: "Is this a real bank?",
+    question: "Does Buy & Build move or hold real money?",
     answer:
-      "No. Buy & Build is a demo-mode prototype and customer-experience layer. Regulated partners would handle the real financial services later.",
+      "No. This prototype is a product demo only. No real money is moved, stored, or held. Regulated partners would provide financial services in a production experience.",
   },
   {
-    question: "What happens in demo mode?",
+    question: "How does Shop & Save work?",
     answer:
-      "All money actions are simulated. The app clearly labels demo mode and keeps every contribution opt-in.",
+      "You choose a fixed, percentage, or round-up rule and explicitly opt in. For example, 5% of a ₦40,000 eligible purchase is a separate ₦2,000 contribution—not a discount. You can pause or change the rule any time.",
   },
   {
-    question: "Can I save with friends?",
+    question: "Can I save with other people?",
     answer:
-      "Yes. Joint pots support invites, contribution tracking, member roles, approval rules, and proportional refunds.",
+      "The prototype includes joint-savings concepts with member roles, contribution activity, and withdrawal approvals. Joint pots are savings-only.",
+  },
+  {
+    question: "Are investment returns guaranteed?",
+    answer:
+      "No. Investments are not the same as savings, involve risk, and are not offered as real products in this demo. Any future investment experience would be partner-powered with risk information.",
   },
 ];
 
+function KoboIllustration() {
+  return (
+    <div className="hero-art" role="img" aria-label="Kobo, the gold coin mascot, beside a stack of building blocks">
+      <div className="hero-art-glow" />
+      <div className="coin-orbit orbit-a" />
+      <div className="coin-orbit orbit-b" />
+      <div className="kobo-figure">
+        <div className="kobo-backpack-strap" />
+        <div className="kobo-coin">
+          <span className="kobo-eye eye-a" />
+          <span className="kobo-eye eye-b" />
+          <span className="kobo-mouth" />
+          <span className="kobo-highlight" />
+        </div>
+        <div className="kobo-feet"><span /><span /></div>
+      </div>
+      <div className="hero-blocks" aria-hidden="true">
+        <span className="hero-block block-lilac" />
+        <span className="hero-block block-mint" />
+        <span className="hero-block block-cream" />
+        <span className="hero-block block-violet" />
+      </div>
+      <div className="hero-note note-save"><span className="note-dot" /> Your goals, in reach</div>
+      <div className="hero-note note-demo">Demo mode · no real money moves</div>
+    </div>
+  );
+}
+
 export default function Home() {
   return (
-    <main className="page-shell">
-      <div className="ambient ambient-one" />
-      <div className="ambient ambient-two" />
-
-      <header className="topbar">
-        <div className="brand-wrap">
-          <div className="brand-mark" aria-hidden="true">
-            <span className="brand-mark-inner" />
-          </div>
-          <div>
-            <p className="brand-kicker">Buy & Build</p>
-            <p className="brand-sub">Lifestyle money</p>
-          </div>
-        </div>
-
-        <nav className="nav" aria-label="Main navigation">
-          <Link href="#features">Features</Link>
-          <Link href="#why">Why it works</Link>
-          <Link href="#joint">Joint savings</Link>
-          <Link href="#faq">FAQ</Link>
+    <main className="marketing-page">
+      <div className="marketing-glow marketing-glow-left" aria-hidden="true" />
+      <div className="marketing-glow marketing-glow-right" aria-hidden="true" />
+      <header className="marketing-nav">
+        <Link className="marketing-brand" href="/" aria-label="Buy & Build home">
+          <span className="brand-coin" aria-hidden="true"><span /></span>
+          <span><strong>BUY & BUILD</strong><small>Money for real life</small></span>
+        </Link>
+        <nav className="marketing-links" aria-label="Main navigation">
+          <a href="#how-it-works">How it works</a>
+          <a href="#together">Together</a>
+          <a href="#trust">Trust</a>
         </nav>
-
-        <div className="nav-actions">
-          <Link href="/login" className="nav-link ghost">
-            Log in
-          </Link>
-          <Link href="/sign-up" className="nav-link primary">
-            Get started
-          </Link>
+        <div className="marketing-nav-actions">
+          <Link className="button button-quiet" href="/login">Log in</Link>
+          <Link className="button button-primary button-nav-cta" href="/sign-up">Explore the demo <span aria-hidden="true">↗</span></Link>
         </div>
       </header>
 
-      <section className="hero-section">
-        <div className="hero-copy">
-          <span className="eyebrow">Buy What You Love. Build Wealth As You Live.</span>
-          <h1>
-            A better way to <span>buy</span>
-            <br />
-            the life you want,
-            <br />
-            without losing the plan.
-          </h1>
-          <p>
-            Built for Nigerian lifestyles: split pay, save intentionally, grow goals, and save together with friends and family.
-          </p>
-
-          <div className="cta-row">
-            <Link href="/sign-up" className="cta primary">
-              Start free
-            </Link>
-            <Link href="#features" className="cta secondary">
-              Explore the app
-            </Link>
+      <section className="marketing-hero">
+        <div className="hero-content">
+          <p className="overline"><span className="overline-line" /> Made for the life you’re building</p>
+          <h1>Enjoy today.<br /><span>Build for tomorrow.</span></h1>
+          <p className="hero-description">A more thoughtful way to manage everyday spending, build savings habits, and make progress on the goals that matter to you.</p>
+          <div className="hero-actions">
+            <Link href="/sign-up" className="button button-primary button-large">Step into the demo <span aria-hidden="true">↗</span></Link>
+            <a href="#how-it-works" className="button button-secondary button-large">See how it works</a>
           </div>
-
-          <div className="proof-row" aria-label="Key product statistics">
-            {stats.map((item) => (
-              <div key={item.label} className="proof-item">
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
+          <p className="hero-footnote"><span aria-hidden="true">✳</span> A product prototype for Nigeria · No real money moves</p>
         </div>
-
-        <div className="hero-visual" aria-label="Kobo mascot illustration">
-          <div className="orb orb-gold" />
-          <div className="orb orb-violet" />
-          <div className="kobo-stage">
-            <div className="kobo-card">
-              <div className="coin-rim" />
-              <div className="coin-body">
-                <div className="coin-strap" />
-                <div className="coin-face">
-                  <span className="eye left" />
-                  <span className="eye right" />
-                  <span className="smile" />
-                </div>
-              </div>
-              <div className="block-stack" aria-hidden="true">
-                <span className="block b1" />
-                <span className="block b2" />
-                <span className="block b3" />
-              </div>
-            </div>
-          </div>
-
-          <div className="floating-card card-one">
-            <span className="label">Shop • Save</span>
-            <strong>₦2,000</strong>
-            <small>from 5% on a ₦40k purchase</small>
-          </div>
-
-          <div className="floating-card card-two">
-            <span className="label">Goal progress</span>
-            <strong>72%</strong>
-            <small>Rent fund target</small>
-          </div>
-        </div>
+        <KoboIllustration />
       </section>
 
-      <section id="features" className="content-section">
-        <div className="section-heading">
-          <span className="eyebrow">How it works</span>
-          <h2>Designed for the way real people move money.</h2>
-        </div>
+      <section className="brand-marquee" aria-label="Product principles">
+        <span>BUY WHAT YOU LOVE</span><i aria-hidden="true">✳</i><span>BUILD WEALTH AS YOU LIVE</span><i aria-hidden="true">✳</i><span>YOUR MONEY, YOUR PACE</span>
+      </section>
 
-        <div className="feature-grid">
-          {features.map((feature, index) => (
-            <article key={feature.title} className="feature-card">
-              <div className="feature-index">0{index + 1}</div>
-              <div className="feature-topline">{feature.accent}</div>
-              <h3>{feature.title}</h3>
-              <p>{feature.description}</p>
+      <section id="how-it-works" className="marketing-section">
+        <div className="section-intro">
+          <p className="overline"><span className="overline-line" /> Your money, with more intention</p>
+          <h2>One clear plan.<br /><span>More room for life.</span></h2>
+          <p>Turn good intentions into small, manageable moves—without making money feel complicated.</p>
+        </div>
+        <div className="feature-list">
+          {features.map((feature) => (
+            <article className="feature-row" key={feature.number}>
+              <span className="feature-number">{feature.number}</span>
+              <div><p className="feature-detail">{feature.detail}</p><h3>{feature.title}</h3><p className="feature-description">{feature.text}</p></div>
+              <span className="feature-arrow" aria-hidden="true">↗</span>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="why" className="content-section alt-panel">
-        <div className="section-heading split">
-          <div>
-            <span className="eyebrow">Why people stay</span>
-            <h2>Modern control without financial chaos.</h2>
-          </div>
-          <Link href="/login" className="text-link">
-            See the demo flow →
-          </Link>
+      <section id="together" className="together-section">
+        <div className="together-visual" aria-hidden="true">
+          <div className="pot-circle"><span className="pot-center">₦</span><span className="pot-orbit orbit-one">Rent</span><span className="pot-orbit orbit-two">Trip</span><span className="pot-orbit orbit-three">Family</span></div>
+          <div className="pot-caption">A shared goal, with clear ground rules.</div>
         </div>
-
-        <div className="dual-grid">
-          <div className="glass-panel">
-            <h3>Built for real life</h3>
-            <ul>
-              {highlights.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="glass-panel accent-panel">
-            <div className="mini-metric">
-              <span>Available to spend</span>
-              <strong>₦84,750</strong>
-            </div>
-            <div className="mini-metric">
-              <span>Available to save</span>
-              <strong>₦52,300</strong>
-            </div>
-            <div className="mini-metric">
-              <span>Goal contribution</span>
-              <strong>₦18,400</strong>
-            </div>
-          </div>
+        <div className="together-copy">
+          <p className="overline"><span className="overline-line" /> Better, together</p>
+          <h2>Big plans feel lighter<br /><span>when shared.</span></h2>
+          <p>Set up a joint savings pot for a shared goal. Keep contributions visible, make roles clear, and agree how withdrawals work before you begin.</p>
+          <ul className="check-list">
+            <li><span>✓</span> Clear owner and member roles</li>
+            <li><span>✓</span> Approval rules agreed up front</li>
+            <li><span>✓</span> Savings only—no investments inside pots</li>
+          </ul>
+          <Link href="/sign-up" className="text-cta">Explore the joint-savings demo <span aria-hidden="true">→</span></Link>
         </div>
       </section>
 
-      <section id="joint" className="content-section">
-        <div className="section-heading">
-          <span className="eyebrow">Joint savings</span>
-          <h2>Save together with structure, trust, and fewer surprises.</h2>
+      <section id="trust" className="trust-section">
+        <div className="trust-heading">
+          <p className="overline"><span className="overline-line" /> Built with clarity</p>
+          <h2>Trust starts with<br /><span>what we don’t hide.</span></h2>
         </div>
-
-        <div className="joint-grid">
-          <div className="joint-card large">
-            <div className="joint-badge">Majority rule</div>
-            <h3>Lagos Rent Fund</h3>
-            <div className="pot-bar">
-              <span style={{ width: "72%" }} />
-            </div>
-            <div className="pot-figures">
-              <strong>₦1,240,000</strong>
-              <span>of ₦1,700,000</span>
-            </div>
-          </div>
-
-          <div className="joint-card small">
-            <h3>Included</h3>
-            <ul>
-              <li>Invite by username, phone, or email</li>
-              <li>Accept/decline flows with 7-day expiry</li>
-              <li>Member roles, votes, and proportional refunds</li>
-            </ul>
-          </div>
+        <div className="trust-grid">
+          <article className="trust-card"><span className="trust-icon" aria-hidden="true">◎</span><h3>Demo means demo</h3><p>No real funds are moved, stored, or held. Sample balances and activity are illustrative.</p></article>
+          <article className="trust-card"><span className="trust-icon" aria-hidden="true">↗</span><h3>Choice stays yours</h3><p>Purchase-linked contributions require explicit opt-in. Pause, adjust, or opt out whenever you choose.</p></article>
+          <article className="trust-card"><span className="trust-icon" aria-hidden="true">◇</span><h3>Savings ≠ investing</h3><p>They’re shown separately. Investments carry risk; returns are never promised or guaranteed.</p></article>
         </div>
       </section>
 
-      <section id="faq" className="content-section faq-section">
-        <div className="section-heading">
-          <span className="eyebrow">FAQ</span>
-          <h2>Everything people ask before they trust the product.</h2>
-        </div>
-
-        <div className="faq-list">
-          {faqs.map((faq) => (
-            <article key={faq.question} className="faq-item">
-              <h3>{faq.question}</h3>
-              <p>{faq.answer}</p>
-            </article>
-          ))}
+      <section id="faq" className="faq-section">
+        <div className="faq-heading"><p className="overline"><span className="overline-line" /> Good to know</p><h2>Questions, answered.</h2></div>
+        <div className="faq-grid">
+          {faqs.map((faq) => <details className="faq-item" key={faq.question}><summary>{faq.question}<span aria-hidden="true">+</span></summary><p>{faq.answer}</p></details>)}
         </div>
       </section>
 
-      <section className="cta-banner">
-        <div>
-          <span className="eyebrow">Demo mode</span>
-          <h2>Start with the story, then replace the provider layer later.</h2>
-        </div>
-        <Link href="/login" className="cta primary large">
-          Launch the prototype
-        </Link>
+      <section className="final-cta">
+        <div className="final-cta-coin" aria-hidden="true"><span>₦</span></div>
+        <p className="overline">A little more intention goes a long way</p>
+        <h2>Make your next move<br /><span>feel like yours.</span></h2>
+        <Link href="/sign-up" className="button button-primary button-large">Explore the demo <span aria-hidden="true">↗</span></Link>
+        <p className="final-note">Demo experience only. No real money moves.</p>
       </section>
+
+      <footer className="marketing-footer">
+        <Link className="marketing-brand" href="/" aria-label="Buy & Build home"><span className="brand-coin" aria-hidden="true"><span /></span><span><strong>BUY & BUILD</strong><small>Buy What You Love. Build Wealth As You Live.</small></span></Link>
+        <p>© 2026 Buy & Build · A demo product experience</p>
+        <a href="#trust">How your money is handled</a>
+      </footer>
     </main>
   );
 }
