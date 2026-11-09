@@ -52,8 +52,8 @@ def main():
     
     if target_obj:
         # Set as active object in view layer
-        for obj in bpy.data.objects:
-            obj.select_set(False)
+        for ob in bpy.data.objects:
+            ob.select_set(False)
         target_obj.select_set(True)
         bpy.context.view_layer.objects.active = target_obj
     obj = bpy.context.view_layer.objects.active
@@ -77,7 +77,6 @@ def main():
             mesh_objects.append(ob)
     
     # Deselect everything, then select each mesh to apply modifiers
-    # Use the operator from bpy directly
     bpy.ops.object.select_all(action='DESELECT')
     
     for ob in mesh_objects:
@@ -134,7 +133,7 @@ def main():
         if objects_to_select:
             bpy.context.view_layer.objects.active = objects_to_select[0]
         
-        # Export settings for glTF
+        # Export settings for glTF (compatible with Blender 5.3 Alpha)
         print(f"Exporting full GLB to: {full_glb_path}")
         
         try:
@@ -204,10 +203,8 @@ def main():
                     export_materials='NONE',
                     export_animations=True,
                     export_nla_strips=False,
-                    export_morph_targets=True,
                     export_yup=True,
                     export_apply=True,
-                    export_textures=False,
                 )
                 
                 file_size = os.path.getsize(lite_glb_path)
@@ -229,7 +226,6 @@ def main():
                         export_animations=True,
                         export_yup=True,
                         export_apply=True,
-                        export_textures=False,
                     )
                     file_size = os.path.getsize(lite_glb_path)
                     print(f"Fallback GLB exported: {file_size:,} bytes")
@@ -256,7 +252,6 @@ def main():
                     export_animations=True,
                     export_yup=True,
                     export_apply=True,
-                    export_textures=False,
                 )
                 file_size = os.path.getsize(lite_glb_path)
                 print(f"Fallback GLB exported: {file_size:,} bytes")
