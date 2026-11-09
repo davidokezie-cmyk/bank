@@ -447,18 +447,18 @@ function JointPage({ creating = false, detail = false }: { creating?: boolean; d
 }
 
 function InvitesPage() {
-  const [accepted, setAccepted] = useState(false)
+  const [status, setStatus] = useState<'pending' | 'accepted' | 'declined'>('pending')
   const [termsAccepted, setTermsAccepted] = useState(false)
   return (
     <PageFrame title="Pot invitations" description="Review the pot details and terms before accepting. You can decline without affecting your other goals or accounts.">
-      {accepted ? <p className={panelClass} role="status">Invitation accepted in demo mode. <Link className="underline" href="/joint/lagos-rent">Open Lagos Rent Fund</Link>.</p> : (
+      {status === 'accepted' ? <p className={panelClass} role="status">Invitation accepted in demo mode. <Link className="underline" href="/joint/lagos-rent">Open Lagos Rent Fund</Link>.</p> : status === 'declined' ? <p className={panelClass} role="status">Invitation declined. No contribution was made. <Link className="underline" href="/joint">Return to Joint Savings</Link>.</p> : (
         <article className={`${panelClass} max-w-2xl`}>
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--gold)]">Invited by Aisha · expires in 6 days</p>
           <h2 className="mt-2 text-xl font-semibold">Lagos Rent Fund</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">Shared rent goal · Majority approval · Member role · Savings only</p>
           <div className="my-5 space-y-2 rounded-xl bg-[var(--raised)] p-4 text-sm leading-6"><p>Your contributions are voluntary and itemised.</p><p>If you leave, your refund is proportional to your net contributions and the pot balance.</p><p>Owner starts closure; every member confirms. Demo withdrawal fee: ₦0.</p><p>A real launch needs a regulated partner to hold pooled funds and verify members. There are no guaranteed returns or insurance claims.</p></div>
           <label className="mb-5 flex items-start gap-3 text-sm"><input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} /><span>I accept the displayed pot terms and understand this is a demo.</span></label>
-          <div className="flex flex-wrap gap-3"><button className={buttonClass} disabled={!termsAccepted} type="button" onClick={() => setAccepted(true)}>Accept invitation</button><button type="button" className="min-h-11 rounded-xl border border-[var(--border)] px-5 py-3" onClick={() => setAccepted(true)}>Decline</button></div>
+          <div className="flex flex-wrap gap-3"><button className={buttonClass} disabled={!termsAccepted} type="button" onClick={() => setStatus('accepted')}>Accept invitation</button><button type="button" className="min-h-11 rounded-xl border border-[var(--border)] px-5 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]" onClick={() => setStatus('declined')}>Decline</button></div>
         </article>
       )}
     </PageFrame>
@@ -524,8 +524,8 @@ function CardsPanel() {
 }
 
 function ProfilePage() {
-  const { value: profile, setValue: setProfile } = useDemoStorage('buy-build:profile', { displayName: 'Demo member', email: 'demo@example.com' })
-  return <PageFrame title="Profile" description="Manage your demo profile. Do not enter sensitive identifiers or real passwords."><form className={`${panelClass} max-w-xl space-y-4`} onSubmit={(event) => { event.preventDefault(); setProfile({ ...profile }) }}><label className={labelClass}>Display name<input className={fieldClass} maxLength={60} value={profile.displayName} onChange={(event) => setProfile({ ...profile, displayName: event.target.value })} /></label><label className={labelClass}>Demo email<input className={fieldClass} type="email" autoComplete="off" value={profile.email} onChange={(event) => setProfile({ ...profile, email: event.target.value })} /></label><button type="submit" className={buttonClass}>Save profile</button><p className="text-xs text-[var(--muted)]">This information stays in this browser’s demo storage.</p></form></PageFrame>
+  const { value: profile, setValue: setProfile, storageError } = useDemoStorage('buy-build:profile', { displayName: 'Demo member' })
+  return <PageFrame title="Profile" description="Manage your demo profile. Do not enter sensitive identifiers or real passwords."><section className={`${panelClass} max-w-xl space-y-4`}><label className={labelClass}>Display name<input className={fieldClass} maxLength={60} value={profile.displayName} onChange={(event) => setProfile({ ...profile, displayName: event.target.value })} /></label><p className="text-xs text-[var(--muted)]">Your display name is saved automatically in this browser’s demo storage. No email address is needed.</p>{storageError && <p role="alert" className="text-sm text-[var(--alert-coral)]">{storageError}</p>}</section></PageFrame>
 }
 
 export function FeaturePage({ screen }: { screen: FeatureScreen }) {
