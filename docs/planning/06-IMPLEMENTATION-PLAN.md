@@ -9,14 +9,14 @@
 ### Phase 2 — Foundation (Current)
 **Goal**: Design tokens, fonts, global motion helpers, UI primitives, dark/light theme, demo-mode auth layer.
 
-- [ ] Create `src/lib/money.ts` (kobo ↔ ₦ conversion)
-- [ ] Create `src/lib/motion.ts` (spring constants, reduced-motion flag)
-- [ ] Create UI primitives: Button, Card, Input, Sheet, Tabs, Toast, Progress, Skeleton, EmptyState
-- [ ] Implement dark/light theme using Tailwind v4 `dark:` variant
-- [ ] Add `next/font` Sora + Inter
-- [ ] Set up Tailwind v4 config with custom tokens (ink, surface, raised, gold, green-growth, alert-coral)
-- [ ] Demo-mode auth layer: cookie-based fallback when no Clerk keys
-- [ ] Commit: `foundation: add tokens, primitives, auth`
+- [x] Create `src/lib/money.ts` (kobo ↔ ₦ conversion)
+- [x] Create `src/lib/motion.ts` (spring constants, reduced-motion flag)
+- [x] Create UI primitives: Button, Card, Input, Sheet, Tabs, Toast, Progress, Skeleton, EmptyState
+- [x] Implement dark/light theme using Tailwind v4 `dark:` variant
+- [x] Add `next/font` Sora + Inter
+- [x] Set up Tailwind v4 config with custom tokens (ink, surface, raised, gold, green-growth, alert-coral)
+- [x] Demo-mode auth layer: cookie-based fallback when no Clerk keys
+- [x] Commit: `foundation: add tokens, primitives, auth`
 
 ### Phase 3 — Core Logic First (with tests)
 **Goal**: Implement and unit-test salary split, Shop & Save, goal allocation, available-to-spend, savings-vs-investments separation, and ALL Joint Savings logic. Then mock services and seeded demo data.
@@ -86,7 +86,7 @@
 ### Phase 5 — Public Pages
 **Goal**: Marketing homepage, /login, /sign-up with Kobo cinematic.
 
-- [ ] Marketing homepage (hero with Kobo; how it works section; ₦40,000 @ 5% example; trust/partner model; FAQ; CTAs; GSAP scroll sequences)
+- [x] Marketing homepage (hero with Kobo; how it works section; ₦40,000 @ 5% example; trust/partner model; FAQ; CTAs; GSAP scroll sequences)
 - [ ] /login with calm cinematic Kobo sequence (slow dolly + soft light sweep)
 - [ ] /sign-up with validation and demo-mode option
 - [ ] Commit: `public-pages: marketing + auth`
@@ -148,7 +148,7 @@
 
 ## Prototype Launch-Readiness Checklist
 
-- [ ] All routes exist and are navigable
+- [x] All routes exist and are navigable
 - [ ] Demo mode works with zero environment variables
 - [ ] `pnpm check` passes (typecheck + lint + test + build)
 - [ ] Mascot GLB files exist and pass `gltf-transform validate`
