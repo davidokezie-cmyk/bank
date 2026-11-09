@@ -147,7 +147,6 @@ def main():
                 export_nla_strips=False,
                 export_yup=True,  # Convert from Z-up (blender) to Y-up (glTF)
                 export_apply=True,  # Apply modifiers, materials, etc.
-                export_empty_as_null=True,
             )
             
             file_size = os.path.getsize(full_glb_path)
