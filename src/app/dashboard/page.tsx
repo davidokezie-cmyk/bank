@@ -1,12 +1,13 @@
-/* eslint-disable */
+'use client'
+
 import { useEffect } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { KoboProcedural } from '@/components/three/KoboProcedural'
 import { KoboFallback } from '@/components/three/KoboFallback'
-import { triggerMoneyConfirmation } from '@/components/ui/toast/Toast'
+import { ToastViewport, triggerMoneyConfirmation } from '@/components/ui/toast/Toast'
 import { cn } from '@/lib/utils'
 
 /**
@@ -86,15 +87,15 @@ export default function Dashboard() {
             <p className="text-[var(--muted)] text-sm mb-1">Available to Spend</p>
             <p className="text-2xl font-bold text-[var(--gold)]">{koboToNaira(availableSpend)}</p>
           </div>
-          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style="animation-delay: 0.1s;">
+          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style={{ animationDelay: '0.1s' }}>
             <p className="text-[var(--muted)] text-sm mb-1">Available to Save</p>
             <p className="text-2xl font-bold text-[var(--green-growth)]">{koboToNaira(availableSave)}</p>
           </div>
-          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style="animation-delay: 0.2s;">
+          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style={{ animationDelay: '0.2s' }}>
             <p className="text-[var(--muted)] text-sm mb-1">Joint Pots</p>
             <p className="text-[var(--gold)] font-medium">{pendingInvites} pending invites</p>
           </div>
-          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style="animation-delay: 0.3s;">
+          <div className="reveal p-4 rounded-xl bg-[var(--raised)]" style={{ animationDelay: '0.3s' }}>
             <p className="text-[var(--muted)] text-sm mb-1">Votes</p>
             <p className="text-[var(--green-growth)] font-medium">{pendingVotes} pending</p>
           </div>
@@ -476,6 +477,7 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+      <ToastViewport />
     </main>
   )
 }

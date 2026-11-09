@@ -43,7 +43,7 @@ export function createShopSaveRule(
   ruleType: ShopSaveRuleType,
   ruleValue: number,
   isOptInEnabled: boolean = false
-): ShopSaveRule => {
+): ShopSaveRule {
   const now = Date.now()
   return {
     id: `shop-save-${now}`,
@@ -71,7 +71,7 @@ export function calculateContribution(
   purchaseKobo: number,
   rule: ShopSaveRule
 ): { contributionKobo: number; method: string; description: string } | null {
-  if (!rule.isActive) return null
+  if (!rule.isActive || !rule.isOptInEnabled) return null
 
   switch (rule.ruleType) {
     case 'fixed':
@@ -103,13 +103,13 @@ export function calculateContribution(
     case 'round_up':
       // Round up to nearest ₦100, contribute the difference
       // e.g. ₦40,370 → round up to ₦40,400 → contribute ₦30
-      const roundedUp = Math.ceil(purchaseKobo / 100) * 100
-      const contribution = roundedUp - purchaseKobo
-      if (contribution > 0) {
+      const roundedUpKobo = Math.ceil(purchaseKobo / 10000) * 10000
+      const roundUpContribution = roundedUpKobo - purchaseKobo
+      if (roundUpContribution > 0) {
         return {
-          contributionKobo: contribution,
+          contributionKobo: roundUpContribution,
           method: 'round_up',
-          description: `Round-up from ₦${koboToNaira(purchaseKobo)} to ₦${koboToNaira(roundedUp)} = ₦${koboToNaira(contribution)}`,
+          description: `Round-up from ₦${koboToNaira(purchaseKobo)} to ₦${koboToNaira(roundedUpKobo)} = ₦${koboToNaira(roundUpContribution)}`,
         }
       }
       return null
@@ -181,12 +181,12 @@ export function exampleCanonicalCase(): {
  * Round up amount to nearest ₦100 (pure function, no side effects).
  */
 export function roundUpToHundred(kobo: number): number {
-  return Math.ceil(kobo / 100) * 100
+  return Math.ceil(kobo / 10000) * 10000
 }
 
 /**
  * Round down amount to nearest ₦100.
  */
 export function roundDownToHundred(kobo: number): number {
-  return Math.floor(kobo / 100) * 100
+  return Math.floor(kobo / 10000) * 10000
 }

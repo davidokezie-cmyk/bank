@@ -1,6 +1,7 @@
-/* eslint-disable @next/next/no-img-import */
+'use client'
+
+import React, { forwardRef, useId, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { useRef, useState } from 'react'
 
 /**
  * Input component with states:
@@ -31,7 +32,7 @@ export interface InputProps extends React.HTMLAttributes<HTMLInputElement> {
   describedBy?: string
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(props => {
+export const Input = forwardRef<HTMLInputElement, InputProps>((props, forwardedRef) => {
   const {
     label,
     errorMessage,
@@ -48,7 +49,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(props => {
   } = props
 
   const [isFocused, setIsFocused] = useState(false)
-  const ref = useRef<HTMLInputElement>(null)
+  const generatedId = useId()
+  const inputId = name ?? generatedId
 
   const handleFocus = () => {
     setIsFocused(true)
@@ -62,6 +64,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(props => {
     'w-full rounded-md border border-border bg-transparent px-3 py-2 text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
     disabled && 'opacity-50 cursor-not-allowed',
     money && 'font-numeric',
+    className,
   )
 
   const inputClasses = cn(
@@ -77,23 +80,24 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(props => {
     <div className="space-y-1">
       {label && (
         <label
-          htmlFor={ref.current?.id || 'input'}
-          className=cn(
+          htmlFor={inputId}
+          className={cn(
             'block text-sm font-medium text-primary hover:text-accent-violet',
             isFocused && 'text-accent-violet',
-          )
+          )}
         >
           {label}
         </label>
       )}
 
       <input
-        ref={ref}
-        id={ref.current?.id || undefined}
+        ref={forwardedRef}
+        id={inputId}
         name={name}
         type={type}
+        autoFocus={autoFocus}
         placeholder={placeholder}
-        className=cn(baseClasses, inputClasses)
+        className={cn(baseClasses, inputClasses)}
         onFocus={handleFocus}
         onBlur={handleBlur}
         disabled={disabled}
@@ -105,10 +109,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(props => {
         <p
           role="alert"
           aria-live="polite"
-          className=cn(
+          className={cn(
             'text-alert-coral text-xs mt-1',
             isFocused && 'text-alert-coral',
-          )
+          )}
           id={describedBy || undefined}
         >
           {errorMessage}

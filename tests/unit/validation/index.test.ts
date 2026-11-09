@@ -81,17 +81,16 @@ describe('NUBAN & Nigerian Phone Validation', () => {
       expect(result.errors.some(e => e.includes('100%'))).toBe(true)
     })
 
-    it('should correct percentages to total 100%', () => {
+    it('should not auto-correct a split that does not total 100%', () => {
       const result = validateSalarySplitPercentages([40, 30])
-      expect(result.valid).toBe(true)
-      // Should be corrected to [40, 60] or similar to total 100
-      expect(result.corrected.reduce((a, b) => a + b, 0)).toBe(100)
+      expect(result.valid).toBe(false)
+      expect(result.corrected).toEqual([40, 30])
     })
 
     it('should handle edge case of all zeros', () => {
       const result = validateSalarySplitPercentages([0, 0, 0])
-      expect(result.valid).toBe(true) // All zeros gets even distribution
-      // Should be corrected to [33, 33, 34] or similar
+      expect(result.valid).toBe(false)
+      expect(result.corrected).toEqual([0, 0, 0])
     })
   })
 

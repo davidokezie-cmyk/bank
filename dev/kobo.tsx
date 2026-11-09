@@ -1,11 +1,11 @@
-/* eslint-disable */
+'use client'
+
 import { useState, useEffect } from 'react'
-import { useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { KoboProcedural } from '@/components/three/KoboProcedural'
 import { KoboFallback } from '@/components/three/KoboFallback'
-import { useRouter } from 'next/navigation'
 
 /**
  * /dev/kobo - Mascot preview page.
@@ -19,16 +19,14 @@ import { useRouter } from 'next/navigation'
  */
 
 export default function DevKobo() {
-  const router = useRouter()
   const reducedMotion = useReducedMotion()
 
   const moods = ['idle', 'wave', 'celebrate', 'thinking'] as const
   const models = ['glb', 'procedural'] as const
 
   const [currentModel, setCurrentModel] = useState<'glb' | 'procedural'>('procedural')
-  const [currentMood, setCurrentMood] = useState<'idle'>('idle')
+  const [currentMood, setCurrentMood] = useState<(typeof moods)[number]>('idle')
   const [fps, setFps] = useState(0)
-  const [fileSizes, setFileSizes] = useState<'glb' | 'procedural'>('procedural')
 
   // Simulate FPS and file size data
   useEffect(() => {
@@ -45,7 +43,7 @@ export default function DevKobo() {
   }
 
   // Switch mood
-  const switchMood = (mood: typeof moods[number]) => {
+  const switchMood = (mood: (typeof moods)[number]) => {
     setCurrentMood(mood)
   }
 
@@ -102,7 +100,7 @@ export default function DevKobo() {
               aria-label={`Switch to ${mood} mood`}
               disabled={reducedMotion}
             >
-              {moodLabels[currentMood] || 'Idle'}
+              {moodLabels[mood] || 'Idle'}
               {reducedMotion && <span className="sr-only">(reduced motion)</span>}
             </button>
           ))}
@@ -112,8 +110,7 @@ export default function DevKobo() {
       <section className="dev-koba-display">
         {reducedMotion ? (
           <KoboFallback mood={currentMood} reducedMotion={true} />
-        ) : currentModel === 'glb'
-          ? /* GLB model would go here */ (
+        ) : currentModel === 'glb' ? (
             <div className="kobo-glb-placeholder">
               <p>GLB model loading...</p>
               <Image
@@ -125,10 +122,7 @@ export default function DevKobo() {
               />
               <p>GLB model: use Bforartists for full model</p>
             </div>
-          ) : (
-            <KoboProcedural />
-          )
-        )}
+          ) : <KoboProcedural />}
       </section>
 
       <section className="dev-stats">
@@ -139,7 +133,7 @@ export default function DevKobo() {
             <div className="stat-label">Frames per second</div>
           </div>
           <div className="stat-item">
-            <div className="stat-value">{fileSizes[currentModel]}</div>
+            <div className="stat-value">{modelInfo[currentModel].fileSize}</div>
             <div className="stat-label">File size</div>
           </div>
           <div className="stat-item">
@@ -150,10 +144,7 @@ export default function DevKobo() {
       </section>
 
       <footer className="dev-page-footer">
-        <p>
-          {'{'}{\/+234} 1 mobile optimization} — Procedural model used on mobile /
-          {'{'}{\+GLTF} 2 full GLB on desktop (when Bforartists available)}
-        </p>
+        <p>Procedural fallback for mobile; full GLB model when available.</p>
         <nav>
           <ul className="footer-nav">
             <li>

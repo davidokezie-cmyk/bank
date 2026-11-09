@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-import */
+import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -19,7 +19,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string
 }
 
-export const Card = forwardRef<HTMLDivElement, CardProps>(props => {
+export const Card = forwardRef<HTMLDivElement, CardProps>((props, ref) => {
   const { elevated = false, hasHeader, hasFooter, className, children, ...rest } = props
 
   const elevationClasses = {
@@ -29,14 +29,15 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(props => {
 
   return (
     <div
-      className=cn(
+      ref={ref}
+      className={cn(
         'rounded-md border border-border bg-surface/50 backdrop-blur-sm',
         elevated && elevationClasses.true,
         !elevated && elevationClasses.false,
         'overflow-hidden',
         className,
-      ),
-      ...rest,
+      )}
+      {...rest}
     >
       {hasHeader && <div className="p-6 border-b border-border">{children}</div>}
       {/* Header would be passed separately in practice */}

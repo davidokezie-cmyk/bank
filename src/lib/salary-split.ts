@@ -15,7 +15,7 @@
  * - ₦40,000 @ 5% = ₦2,000
  */
 
-import { koboToNaira, nairaToKobo, addKobo, multiplyKobo, percentageOfKobo, ensureTotal100 } from './money'
+import { nairaToKobo, addKobo, subtractKobo, percentageOfKobo } from './money'
 
 export type SplitCategory = 'spending' | 'savings' | 'goal'
 
@@ -35,8 +35,7 @@ export interface SalarySplitState {
 
 /**
  * Create a new salary split rule.
- * Ensures the total across all rules remains 100%.
- * Returns { rule, updatedRules, isValid }
+ * Updates or adds a rule and reports whether the active rules total exactly 100%.
  */
 export function createRule(
   rules: SalarySplitRule[],
@@ -44,61 +43,34 @@ export function createRule(
   allocationPercentage: number,
   goalId?: string
 ): { rule: SalarySplitRule; updatedRules: SalarySplitRule[]; isValid: boolean } {
-  // Clamp percentage to 0-100
-  const clamped = Math.max(0, Math.min(100, allocationPercentage))
-
-  // Create the new rule
+  const existingRule = rules.find((rule) => rule.category === category)
   const newRule: SalarySplitRule = {
-    id: `rule_${Date.now()}`,
+    id: existingRule?.id ?? `rule_${Date.now()}`,
     category,
-    allocationPercentage: clamped,
+    allocationPercentage,
     isActive: true,
     goalId,
   }
 
-  // Try to ensure total remains 100%
-  const { valid, corrected } = ensureTotal100(
-    rules.map(r => r.allocationPercentage).concat(clamped)
+  const existingIndex = rules.findIndex((rule) => rule.category === category)
+  const updatedRules = existingIndex < 0
+    ? [...rules, newRule]
+    : rules.map((rule, index) => index === existingIndex ? newRule : rule)
+  const activeRules = updatedRules.filter((rule) => rule.isActive)
+  const percentagesValid = activeRules.every((rule) =>
+    Number.isFinite(rule.allocationPercentage)
+    && rule.allocationPercentage >= 0
+    && rule.allocationPercentage <= 100
+    && (rule.category !== 'goal' || Boolean(rule.goalId))
   )
 
-  let updatedRules: SalarySplitRule[]
-
-  if (valid) {
-    // Replace or add the rule with the corrected percentage
-    const existingIndex = rules.findIndex(r => r.category === category)
-    
-    if (existingIndex >= 0) {
-      // Update existing rule
-      updatedRules = rules.map((r, i) =>
-        i === existingIndex
-          ? { ...r, allocationPercentage: corrected[existingIndex] }
-          : r
-      )
-    } else {
-      // Add new rule
-      updatedRules = [...rules, newRule]
-      // Re-ensure total after addition
-      const { valid: valid2, corrected: corrected2 } = ensureTotal100(
-        updatedRules.map(r => r.allocationPercentage)
-      )
-      if (valid2) {
-        // Find and replace with corrected value
-        const finalIndex = updatedRules.findIndex(r => r.category === category)
-        if (finalIndex >= 0) {
-          updatedRules = updatedRules.map(r =>
-            r.category === category
-              ? { ...r, allocationPercentage: corrected2[finalIndex] }
-              : r
-          )
-        }
-      }
-    }
-  } else {
-    // Failed to balance - return the original rule but invalid
-    updatedRules = [...rules]
+  return {
+    rule: newRule,
+    updatedRules,
+    isValid: percentagesValid
+      && activeRules.reduce((sum, rule) => sum + rule.allocationPercentage, 0) === 100
+      && new Set(activeRules.map((rule) => rule.category)).size === activeRules.length,
   }
-
-  return { rule: newRule, updatedRules, isValid: valid }
 }
 
 /**
@@ -126,7 +98,7 @@ export function removeRule(
   
   if (currentSum === 100) {
     // Already totaling 100, no rebalancing needed
-    return { removedRule: removed, remainingRules, rebalanced: true }
+    return { removedRule: removed, remainingRules: remaining, rebalanced: true }
   }
 
   // Distribute proportionally
@@ -172,11 +144,8 @@ export function allocateSalary(
   }
 
   // If only one rule, assign all to it
-  if (activeRules.length === 1) {
-    const allKobo = activeRules[0].allocationPercentage === 100 ? totalKobo : 0
-    if (activeRules[0].category === 'spending') return { spending: totalKobo, savings: 0, goal: 0 }
-    if (activeRules[0].category === 'savings') return { spending: 0, savings: totalKobo, goal: 0 }
-    return { spending: 0, savings: 0, goal: totalKobo }
+  if (activeRules.reduce((sum, rule) => sum + rule.allocationPercentage, 0) !== 100) {
+    return result
   }
 
   // Distribute proportionally based on allocation percentages
@@ -247,8 +216,7 @@ export function calculateAvailableToSpend(
   // Savings is the 'savings' category
   const availableSave = allocations.savings
 
-  // Available to spend = total - savings
-  const availableSpend = nairaToKobo(totalNaira) - availableSave
+  const availableSpend = allocations.spending
 
   // Goal allocations
   const goalAllocations: Record<string, number> = {}
@@ -277,15 +245,15 @@ export function validateSalarySplit(
   const corrected = [...rules]
 
   // Check total percentage = 100
-  const percentages = rules.map(r => r.allocationPercentage)
-  const { valid: totalValid, corrected: correctedPercentages } = ensureTotal100(percentages)
+  const activeRules = rules.filter((rule) => rule.isActive)
+  const percentages = activeRules.map(r => r.allocationPercentage)
+  const totalValid = percentages.reduce((sum, percentage) => sum + percentage, 0) === 100
 
   if (!totalValid) {
     errors.push('Salary split percentages must total exactly 100%')
   }
 
-  // Check for negative naira amount
-  if (totalNaira <= 0) {
+  if (!Number.isFinite(totalNaira) || totalNaira <= 0) {
     errors.push('Total salary must be greater than zero')
   }
 
@@ -304,13 +272,6 @@ export function validateSalarySplit(
     if (rule.category === 'goal' && !rule.goalId) {
       errors.push(`Goal category must have a goal ID`)
     }
-  }
-
-  // Apply corrections if needed
-  if (totalValid) {
-    corrected.forEach((rule, index) => {
-      rule.allocationPercentage = correctedPercentages[index]
-    })
   }
 
   return {
@@ -340,12 +301,7 @@ export function exampleCanonicalCase(): {
   const allocations = allocateSalary(totalNaira, rules)
   const goalKobo = allocations.goal // Should be 8000 (₦40,000 @ 20% = ₦8,000 = 8000 kobo)
 
-  // For the canonical 5% example: if only one rule with 5% to a goal
-  const fivePctRule: SalarySplitRule[] = [
-    { id: 'r1', category: 'goal', allocationPercentage: 5, isActive: true, goalId: 'test-goal' },
-  ]
-  const fivePctAllocations = allocateSalary(40000, fivePctRule)
-  const fivePctGoalKobo = fivePctAllocations.goal // Should be 2000 (₦40,000 @ 5% = ₦2,000 = 2000 kobo)
+  const fivePctGoalKobo = percentageOfKobo(nairaToKobo(totalNaira), 5)
 
   return {
     totalNaira,

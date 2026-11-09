@@ -80,10 +80,10 @@ export function formatNaira(kobo: number): string {
 }
 
 export function formatKobo(kobo: number): string {
-  // Format raw kobo amount as currency
   return Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN',
-    fractionDigits: 0,
-  }).format(kobo)
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(kobo / KoboPerNaira)
 }

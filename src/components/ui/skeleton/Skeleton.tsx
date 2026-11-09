@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-import */
+import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -20,7 +20,7 @@ export interface SkeletonProps {
   className?: string
 }
 
-export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(props => {
+export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>((props, ref) => {
   const { type, width, height, duration = 1500, className } = props
   const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -40,12 +40,13 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(props => {
 
   return (
     <div
-      className=cn(
+      ref={ref}
+      className={cn(
         baseClasses,
         dimensions,
         height && `h-${height}`,
         className,
-      )
+      )}
       style={{
         animationDuration: `${shimmerDuration}ms`,
       }}

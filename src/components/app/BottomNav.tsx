@@ -1,7 +1,10 @@
-/* eslint-disable */
+'use client'
+
 import { cn } from '@/lib/utils'
-import { useLocation, useReducedMotion } from '@/lib/motion'
-import { useEffect } from 'react'
+import { useReducedMotion } from '@/lib/motion'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+import { useState } from 'react'
 
 /**
  * Bottom navigation bar for mobile and tablet.
@@ -16,88 +19,64 @@ import { useEffect } from 'react'
 
 export const BottomNav = () => {
   const reducedMotion = useReducedMotion()
-  const location = useLocation()
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'goals' | 'save' | 'joint' | 'send' | 'withdraw' | 'cards' | 'more'>('dashboard')
-
-  // Determine active tab from location
-  useEffect(() => {
-    const path = location.pathname
-    if (path.startsWith('/dashboard')) setActiveTab('dashboard')
-    else if (path.startsWith('/goals')) setActiveTab('goals')
-    else if (path.startsWith('/save')) setActiveTab('save')
-    else if (path.startsWith('/joint')) setActiveTab('joint')
-    else if (path.startsWith('/send')) setActiveTab('send')
-    else if (path.startsWith('/withdraw')) setActiveTab('withdraw')
-    else if (path.startsWith('/cards')) setActiveTab('cards')
-    else setActiveTab('more')
-  }, [location.pathname])
+  const pathname = usePathname()
+  const [moreOpen, setMoreOpen] = useState(false)
+  const activeTab = (pathname ?? '/dashboard').split('/')[1] || 'dashboard'
 
   const tabs = [
-    { key: 'dashboard', label: 'Dashboard', icon: 'Layout' },
-    { key: 'goals', label: 'Goals', icon: 'Calendar' },
-    { key: 'save', label: 'Save', icon: 'PiggyBank' },
-    { key: 'more', label: 'More', icon: 'More' },
-  ]
-
-  const isActive = (tab) => activeTab === tab.key
-
-  const handleTabChange = (key) => {
-    setActiveTab(key)
-    // In a real app, would navigate using router
-    const navigate = window.location
-    navigate.pathname = `/${key}`
-  }
+    ['/dashboard', 'Dashboard'],
+    ['/goals', 'Goals'],
+    ['/save', 'Save'],
+    ['/activity', 'Activity'],
+  ] as const
 
   return (
-    <nav className="bottom-nav fixed bottom-0 left-0 right-0 bg-[var(--ink)] border-t border-[var(--border)] shadow-sm flex items-center justify-between px-6 py-2 z-50">
-      <div className="flex-1 flex justify-between">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => handleTabChange(tab.key)}
-            className={`flex flex-col items-center gap-1 py-2 px-1 rounded-md ${
-              isActive(tab)
-                ? 'bg-[var(--surface)] text-[var(--accent-violet)]'
-                : 'text-[var(--muted)] hover:text-[var(--text)] transition-colors'}
-              }
-              aria-pressed={isActive(tab)}
-              aria-label={tab.label}
+    <nav data-reduced-motion={reducedMotion} aria-label="Main navigation" className="bottom-nav fixed bottom-0 left-0 right-0 bg-[var(--ink)] border-t border-[var(--border)] shadow-sm flex items-center justify-between px-3 py-2 z-50">
+      <div className="flex w-full items-center justify-around">
+          {tabs.map((tab) => (
+            <Link
+              key={tab[0]}
+              href={tab[0]}
+              className={cn(
+                'flex min-h-11 flex-col items-center justify-center gap-1 rounded-md px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]',
+                activeTab === tab[0].slice(1)
+                  ? 'bg-[var(--surface)] text-[var(--accent-violet)]'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] transition-colors',
+              )}
+              aria-current={activeTab === tab[0].slice(1) ? 'page' : undefined}
             >
-              <svg
-                className="h-5 w-5 mx-auto mb-1 stroke-[var(--muted)] group-hover:stroke-[var(--accent-violet)] transition-colors ${
-                  isActive(tab)
-                    ? 'stroke-[var(--accent-violet)]'
-                    : ''
-                }"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <path d="M3 12l2-2m2-2l2 2m-2-2l2-2m2 2l-2-2m2 2l2 2m-2-2l2 2m-2-2l-2-2" />
-              </svg>
-              <span className="hidden md:block text-xs">{tab.label}</span>
-            </button>
+              {tab[1]}
+            </Link>
           ))
-        }
-      </div>
-
-      {/* Sheet indicator and quick actions */}
-      <div className="hidden md:block">
-        <button
-          className="flex items-center gap-2 px-3 py-1 rounded-md bg-[var(--surface)] text-sm hover:bg-[var(--raised)] transition-colors"
-          aria-label="Joint Savings"
-        >
-          <svg
-            className="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="currentColor"
+          <button
+            type="button"
+            onClick={() => setMoreOpen((open) => !open)}
+            aria-expanded={moreOpen}
+            aria-controls="mobile-more-menu"
+            className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-md px-2 py-1 text-xs text-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
           >
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 12l-6-6 1.41-1.41L10 13.17l7.08-7.08L18 7l-6 6z" />
-          </svg>
-          Joint Savings (2)
-        </button>
+            More
+          </button>
       </div>
+      {moreOpen && (
+          <div id="mobile-more-menu" className="absolute bottom-full right-2 mb-2 grid min-w-48 gap-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-xl">
+            {[
+              ['/joint', 'Joint Savings'],
+              ['/invites', 'Pot invitations'],
+              ['/send', 'Send'],
+              ['/withdraw', 'Withdraw'],
+              ['/cards', 'Cards'],
+              ['/coach', 'Coach'],
+              ['/settings', 'Settings'],
+              ['/profile', 'Profile'],
+              ['/how-money-is-handled', 'How your money is handled'],
+            ].map(([href, label]) => (
+              <Link key={href} href={href} onClick={() => setMoreOpen(false)} className="rounded-lg px-3 py-2 text-sm text-[var(--text)] hover:bg-[var(--raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]">
+                {label}
+              </Link>
+            ))}
+          </div>
+      )}
     </nav>
   )
 }
-
-/* eslint-enable */

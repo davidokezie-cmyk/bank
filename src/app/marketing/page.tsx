@@ -1,4 +1,5 @@
-/* eslint-disable */
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect } from 'react'
@@ -158,7 +159,7 @@ export default function Home() {
             </div>
 
             {/* Step 2: Shop & Save */}
-            <div className="reveal p-6 rounded-xl bg-[var(--raised)] transition-all hover:bg-[var(--surface)]" style="animation-delay: 0.1s;">
+            <div className="reveal p-6 rounded-xl bg-[var(--raised)] transition-all hover:bg-[var(--surface)]" style={{ animationDelay: '0.1s' }}>
               <div className="step-number text-4xl font-bold text-[var(--gold)]">2</div>
               <h3 className="mt-4 text-xl font-semibold text-[var(--text)]">Shop & Save</h3>
               <p className="mt-2 text-[var(--muted)]">
@@ -167,7 +168,7 @@ export default function Home() {
             </div>
 
             {/* Step 3: Lifestyle Goals */}
-            <div className="reveal p-6 rounded-xl bg-[var(--raised)] transition-all hover:bg-[var(--surface)]" style="animation-delay: 0.2s;">
+            <div className="reveal p-6 rounded-xl bg-[var(--raised)] transition-all hover:bg-[var(--surface)]" style={{ animationDelay: '0.2s' }}>
               <div className="step-number text-4xl font-bold text-[var(--gold)]">3</div>
               <h3 className="mt-4 text-xl font-semibold text-[var(--text)]">Lifestyle Goals</h3>
               <p className="mt-2 text-[var(--muted)]">
@@ -211,7 +212,7 @@ export default function Home() {
             </div>
 
             {/* Joint Pot Progress */}
-            <div className="reveal p-6 rounded-xl bg-[var(--raised)] hover:bg-[var(--surface)] transition-all" style="animation-delay: 0.1s;">
+            <div className="reveal p-6 rounded-xl bg-[var(--raised)] hover:bg-[var(--surface)] transition-all" style={{ animationDelay: '0.1s' }}>
               <h3 className="text-xl font-medium text-[var(--gold)] mb-3">Track Progress</h3>
               <ul className="space-y-2 text-[var(--muted)]">
                 <li>See who contributed, withdrawals, and votes</li>

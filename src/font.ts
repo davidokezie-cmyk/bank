@@ -1,16 +1,17 @@
-import { Inter } from 'next/font/inter'
-import { Sora } from 'next/font/google'
+import { Inter, Sora } from 'next/font/google'
 
-const inter = Inter({
+export const inter = Inter({
+  subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  fallback: 'system-ui',
+  variable: '--font-inter',
+  fallback: ['system-ui'],
 })
 
-const sora = Sora({
+export const sora = Sora({
+  subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  display: ['swap'],
+  variable: '--font-sora',
+  display: 'swap',
 })
 
-export { inter, sora }
-export type { InterFont, SoraFont }
 export default { inter, sora }

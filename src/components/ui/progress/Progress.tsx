@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-import */
+import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -22,7 +22,7 @@ export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: '2' | '4' | '8'
 }
 
-export const Progress = forwardRef<HTMLDivElement, ProgressProps>(props => {
+export const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) => {
   const { value, showLabel = false, label, color = 'gold', showPercentage = true, height = '4', className, ...rest } = props
 
   const percentage = Math.max(0, Math.min(100, value * 100))
@@ -30,9 +30,9 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>(props => {
 
   const colorClasses = {
     gold: 'bg-gold',
-    green-growth: 'bg-green-growth',
-    accent-violet: 'bg-accent-violet',
-    alert-coral: 'bg-alert-coral',
+    'green-growth': 'bg-green-growth',
+    'accent-violet': 'bg-accent-violet',
+    'alert-coral': 'bg-alert-coral',
   }
 
   const labelClasses = cn(
@@ -42,24 +42,25 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>(props => {
 
   return (
     <div
-      className=cn(
+      ref={ref}
+      className={cn(
         'relative w-full rounded-md overflow-hidden',
         barHeight,
         className,
-      )
+      )}
       {...rest}
     >
       <div
-        className=cn(
+        className={cn(
           'absolute inset-0',
           colorClasses[color as keyof typeof colorClasses] || colorClasses.gold,
-        )
+        )}
       />
       <div
-        className=cn(
+        className={cn(
           'relative flex flex-col items-center py-1',
           showLabel && labelClasses,
-        )
+        )}
       >
         {showLabel && <span className="labelClasses">{label}</span>}
         {showPercentage && (

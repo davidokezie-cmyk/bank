@@ -147,7 +147,7 @@ export function createJointPot(
   ownerUserId: string,
   maxMembers: number = 5,
   feeKobo: number = 0
-): JointPot => {
+): JointPot {
   const now = Date.now()
   
   // Validate
@@ -201,7 +201,7 @@ export function inviteMember(
   email?: string,
   phone?: string,
   username?: string
-): JointInvite => {
+): JointInvite {
   const now = Date.now()
   const expiresAt = now + 7 * 24 * 60 * 60 * 1000  // 7 days
   
@@ -709,7 +709,7 @@ export function voteOnWithdrawal(
 export function closeJointPot(
   pot: JointPot,
   ownerUserId: string
-): { distributedMembers: JointPotMember[]; totalDistributedKobo: number; roundingRemainderKobo: number } => {
+): { distributedMembers: JointPotMember[]; totalDistributedKobo: number; roundingRemainderKobo: number } {
   // Validate owner
   if (pot.ownerUserId !== ownerUserId) {
     throw new Error('Only the pot owner can close the pot')

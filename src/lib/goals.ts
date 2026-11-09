@@ -42,8 +42,8 @@ export function createGoal(
   category: GoalCategory,
   targetNaira: number,
   deadline: Date | null = null
-): Goal => {
-  const targetKobo = nairaToKoba(targetNaira)
+): Goal {
+  const targetKobo = nairaToKobo(targetNaira)
   return {
     id: `goal_${Date.now()}`,
     name,

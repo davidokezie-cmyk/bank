@@ -21,10 +21,19 @@ export const durations = {
   celebrate: 400,  // Koba celebrate animation
 }
 
-// Reduced motion preference
-export const useReducedMotion = typeof window !== 'undefined'
-  ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  : false // Server-side: assume no reduced motion (will be overridden by client)
+const reducedMotionQuery = '(prefers-reduced-motion: reduce)'
+
+export function useReducedMotion(): boolean {
+  const subscribe = (callback: () => void) => {
+    if (typeof window === 'undefined') return () => {}
+    const mediaQuery = window.matchMedia(reducedMotionQuery)
+    mediaQuery.addEventListener('change', callback)
+    return () => mediaQuery.removeEventListener('change', callback)
+  }
+  const getSnapshot = () =>
+    typeof window !== 'undefined' && window.matchMedia(reducedMotionQuery).matches
+  return useSyncExternalStore(subscribe, getSnapshot, () => false)
+}
 
 // Motion data attribute for CSS
 export function applyReducedMotion(node: HTMLElement | null, reduced: boolean): void {
@@ -54,18 +63,8 @@ export const springCss = {
  * Respects prefers-reduced-motion: returns false if reduced motion is preferred.
  */
 export function useHover(): [boolean, (nextState: boolean) => void] {
-  const [isHovering, setIsHovering] = React.useState(false)
-
-  React.useEffect(() => {
-    if (useReducedMotion) {
-      setIsHovering(false)
-      return
-    }
-
-    const element: HTMLElement | null = null // Will be set by the caller or use effect
-    // Note: This hook tracks state; the actual event listeners
-    // are typically set up in the component using onMouseOver/onMouseOut
-  }, [useReducedMotion])
-
-  return [isHovering, setIsHovering]
+  return useState(false)
 }
+'use client'
+
+import { useState, useSyncExternalStore } from 'react'

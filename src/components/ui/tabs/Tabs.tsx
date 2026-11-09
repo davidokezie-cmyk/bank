@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-import */
+import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -19,14 +19,14 @@ export interface TabsProps {
   className?: string
 }
 
-export const Tabs = forwardRef<HTMLDivElement, TabsProps>(props => {
+export const Tabs = forwardRef<HTMLDivElement, TabsProps>((props, ref) => {
   const { value, onValueChange, children, showIndicator = true, className } = props
 
   return (
-    <div className=cn(
+    <div ref={ref} className={cn(
       'w-full border-b border-border select-none',
       className,
-    )>
+    )}>
       <div className="flex space-x-1" role="tablist">
         {React.Children.toArray(children).map((child, index) => {
           const childValue = child.props?.value || `tab-${index}`

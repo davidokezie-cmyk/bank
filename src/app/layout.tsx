@@ -1,18 +1,7 @@
-/* eslint-disable */
 import type { Metadata } from "next"
-import { inter, sora } from 'next/font/google'
+import { inter, sora } from "../font"
+import { AppShell } from "@/components/app/AppShell"
 import "./globals.css"
-
-// Sora: display face, Inter: UI body text
-const sora = sora({
-  weight: ['400', '500', '600', '700'],
-  display: ['swap'],
-})
-
-const inter = inter({
-  weight: ['400', '500', '600', '700'],
-  fallback: 'system-ui',
-})
 
 export const metadata: Metadata = {
   title: 'Buy & Build',
@@ -30,38 +19,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${inter.variable} h-full antialiased data-theme="light"`
-        // Theme (light/dark) controlled by meta attribute by middleware
-      }
+      className={`${sora.variable} ${inter.variable} h-full antialiased`}
       data-theme="light"
     >
-      <body className="min-h-full flex flex-col relative z-0">
-        {/* Sidebar - visible on desktop (above 1024px) */}
-        <sidebar-mobile />
-
-        {/* Main content */}
-        <main className="flex-1 ml-64 min-h-screen">
+      <body className="min-h-full flex flex-col relative z-0 bg-[var(--ink)] text-[var(--text)]">
+        <AppShell>
           {children}
-        </main>
-
-        {/* Bottom navigation - visible on mobile (below 1024px) */}
-        <bottom-nav-mobile />
+        </AppShell>
       </body>
     </html>
   )
-}
-
-/* eslint-enable */
-
-// Mobile sidebar component - shown on screens below 1024px
-function sidebarMobile() {
-  // This would be rendered conditionally based on screen size
-  // using CSS or a component that toggles visibility
-  return null
-}
-
-// Mobile bottom nav component - shown on screens below 1024px
-function bottomNavMobile() {
-  // This would be rendered conditionally based on screen size
-  return null
 }

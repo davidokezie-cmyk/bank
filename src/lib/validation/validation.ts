@@ -91,21 +91,18 @@ export function validateSalarySplitPercentages(
   percentages: number[]
 ): { valid: boolean; corrected: number[]; errors: string[] } {
   const errors: string[] = []
-  const corrected = [...percentages]
+  const total = percentages.reduce((sum, percentage) => sum + percentage, 0)
+  const valid = percentages.length > 0
+    && percentages.every((percentage) => Number.isFinite(percentage) && percentage >= 0 && percentage <= 100)
+    && total === 100
 
-  const { valid, corrected: ensured } = ensureTotal100(percentages)
-
-  if (!ensured) {
+  if (!valid) {
     errors.push('Percentages must total exactly 100%')
   }
 
-  corrected.length === ensured.length
-    ? (corrected = ensured)
-    : (corrected = ensureTotal100(percentages).corrected)
-
   return {
-    valid: errors.length === 0,
-    corrected,
+    valid,
+    corrected: [...percentages],
     errors,
   }
 }

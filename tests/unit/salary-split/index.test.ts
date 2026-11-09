@@ -13,32 +13,33 @@ describe('Salary Split - Pure Functions', () => {
   describe('createRule', () => {
     const initialRules: import('@/lib/salary-split').SalarySplitRule[] = []
 
-    it('should create a rule with 50% allocation', () => {
+    it('should reject a split that does not total 100%', () => {
       const { updatedRules, isValid } = createRule(initialRules, 'spending', 50)
-      expect(isValid).toBe(true)
+      expect(isValid).toBe(false)
       expect(updatedRules.length).toBe(1)
       expect(updatedRules[0].allocationPercentage).toBe(50)
     })
 
-    it('should ensure total remains 100% when adding rules', () => {
+    it('should only accept a completed 100% allocation', () => {
       const rules = [
-        { id: 'r1', category: 'spending', allocationPercentage: 50, isActive: true },
+        { id: 'r1', category: 'spending' as SplitCategory, allocationPercentage: 50, isActive: true },
+        { id: 'r2', category: 'savings' as SplitCategory, allocationPercentage: 30, isActive: true },
       ]
-      const { updatedRules: updated, isValid } = createRule(rules, 'savings', 30)
+      const { updatedRules, isValid } = createRule(rules, 'goal', 20, 'rent')
       expect(isValid).toBe(true)
-      // Total should be 80, not 100 - the function tries to balance
-      // But with only 2 rules totaling 80, it should still be valid
-      expect(updatedRules.length).toBe(2)
+      expect(updatedRules.reduce((sum, rule) => sum + rule.allocationPercentage, 0)).toBe(100)
     })
 
-    it('should handle duplicate category by updating', () => {
+    it('should update an existing category without introducing a duplicate', () => {
       const rules = [
-        { id: 'r1', category: 'spending', allocationPercentage: 60, isActive: true },
+        { id: 'r1', category: 'spending' as SplitCategory, allocationPercentage: 50, isActive: true },
+        { id: 'r2', category: 'savings' as SplitCategory, allocationPercentage: 30, isActive: true },
+        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true, goalId: 'rent' },
       ]
       const { updatedRules, isValid } = createRule(rules, 'spending', 40)
-      expect(isValid).toBe(true)
-      // Should have updated the existing rule
-      expect(updatedRules.length).toBe(1)
+      expect(isValid).toBe(false)
+      expect(updatedRules.length).toBe(3)
+      expect(updatedRules[0].id).toBe('r1')
       expect(updatedRules[0].allocationPercentage).toBe(40)
     })
   })
@@ -75,16 +76,16 @@ describe('Salary Split - Pure Functions', () => {
       const rules = [
         { id: 'r1', category: 'spending' as SplitCategory, allocationPercentage: 50, isActive: true },
         { id: 'r2', category: 'savings' as SplitCategory, allocationPercentage: 30, isActive: true },
-        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true },
+        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true, goalId: 'rent' },
       ]
       const result = allocateSalary(40000, rules)
       
       // ₦40,000 * 50% = ₦20,000 = 20000 kobo
       // ₦40,000 * 30% = ₦12,000 = 12000 kobo
       // ₦40,000 * 20% = ₦8,000 = 8000 kobo
-      expect(result.spending).toBe(20000)
-      expect(result.savings).toBe(12000)
-      expect(result.goal).toBe(8000)
+      expect(result.spending).toBe(nairaToKobo(20000))
+      expect(result.savings).toBe(nairaToKobo(12000))
+      expect(result.goal).toBe(nairaToKobo(8000))
     })
 
     it('should handle single rule (100% to one category)', () => {
@@ -92,7 +93,7 @@ describe('Salary Split - Pure Functions', () => {
         { id: 'r1', category: 'savings' as SplitCategory, allocationPercentage: 100, isActive: true },
       ]
       const result = allocateSalary(50000, rules)
-      expect(result.savings).toBe(50000)
+      expect(result.savings).toBe(nairaToKobo(50000))
       expect(result.spending).toBe(0)
       expect(result.goal).toBe(0)
     })
@@ -100,7 +101,7 @@ describe('Salary Split - Pure Functions', () => {
     it('should handle no rules (all to spending)', () => {
       const rules: import('@/lib/salary-split').SalarySplitRule[] = []
       const result = allocateSalary(30000, rules)
-      expect(result.spending).toBe(30000)
+      expect(result.spending).toBe(nairaToKobo(30000))
       expect(result.savings).toBe(0)
       expect(result.goal).toBe(0)
     })
@@ -111,15 +112,13 @@ describe('Salary Split - Pure Functions', () => {
       const rules = [
         { id: 'r1', category: 'spending' as SplitCategory, allocationPercentage: 50, isActive: true },
         { id: 'r2', category: 'savings' as SplitCategory, allocationPercentage: 30, isActive: true },
-        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true },
+        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true, goalId: 'rent' },
       ]
       const result = calculateAvailableToSpend(100000, rules)
       
-      // Total = ₦100,000 = 100000 kobo
-      // Savings = 30% = 30000 kobo
-      // Available to spend = 70000 kobo
-      expect(result.availableSpend).toBe(70000)
-      expect(result.availableSave).toBe(30000)
+      expect(result.availableSpend).toBe(nairaToKobo(50000))
+      expect(result.availableSave).toBe(nairaToKobo(30000))
+      expect(Object.values(result.goalAllocations)).toEqual([nairaToKobo(20000)])
     })
   })
 
@@ -128,7 +127,7 @@ describe('Salary Split - Pure Functions', () => {
       const rules = [
         { id: 'r1', category: 'spending' as SplitCategory, allocationPercentage: 50, isActive: true },
         { id: 'r2', category: 'savings' as SplitCategory, allocationPercentage: 30, isActive: true },
-        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true },
+        { id: 'r3', category: 'goal' as SplitCategory, allocationPercentage: 20, isActive: true, goalId: 'rent' },
       ]
       const result = validateSalarySplit(100000, rules)
       expect(result.valid).toBe(true)
@@ -155,10 +154,8 @@ describe('Salary Split - Pure Functions', () => {
     })
   })
 
-  it('should pass the canonical example: ₦40,000 @ 5% = ₦2,000', () => {
-    const { contribution } = exampleCanonicalCase()
-    // 5% of ₦40,000 = ₦2,000 = 2000 kobo
-    expect(contribution.contributionKobo).toBe(2000)
-    expect(contribution.method).toBe('percentage')
+  it('should calculate the canonical 5% amount: ₦40,000 @ 5% = ₦2,000', () => {
+    const { goalKobo } = exampleCanonicalCase()
+    expect(goalKobo).toBe(nairaToKobo(2000))
   })
 })

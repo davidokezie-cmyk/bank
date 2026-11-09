@@ -1,8 +1,7 @@
-/* eslint-disable @next/next/no-img-import */
-import { motion } from 'motion/react'
+'use client'
+
+import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
-import { Ring, ChevronDown } from 'lucide-react'
-import { useHover } from '@/lib/motion'
 
 /**
  * Button component with multiple states:
@@ -18,7 +17,7 @@ export interface ButtonProps extends React.ComponentPropsWithoutRef<'button'> {
   /** Show loading spinner */
   loading?: boolean
   /** On-click handler */
-  onClick?: () => void
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
   /** Button size */
   size?: 'sm' | 'md' | 'lg'
   /** Full-width button */
@@ -27,9 +26,8 @@ export interface ButtonProps extends React.ComponentPropsWithoutRef<'button'> {
   'aria-live'?: 'polite' | 'assertive'
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(props => {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
   const { variant = 'primary', disabled, loading, size = 'md', fullWidth, children, className, onClick, ...rest } = props
-  const [hover] = useHover()
 
   const variantClasses = {
     primary: 'bg-accent-violet text-white hover:bg-accent-indigo',
@@ -44,35 +42,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(props => {
     lg: 'h-12 px-6 text-lg',
   }[size]
 
-  const disabledClasses = {
-    primary: 'opacity-50 cursor-not-allowed',
-    secondary: 'opacity-50 cursor-not-allowed',
-    ghost: 'opacity-50 cursor-not-allowed',
-    link: 'opacity-50 cursor-not-allowed',
-  }[variant]
-
   return (
-    <motion.button
+    <button
+      ref={ref}
       type="button"
-      className=cn(
+      className={cn(
         'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-enabled',
         variantClasses,
         sizeClasses,
         fullWidth && 'w-full',
         'shadow-sm',
         className,
-      ),
-      whileHover: {
-        opacity: hover && !disabled ? 0.9 : 1,
-      },
-      whilePress: {
-        scale: 0.96,
-      },
-      disabled: disabled || loading,
-      'aria-disabled': disabled || loading,
-      'aria-busy': loading,
-      onClick: disabled || loading ? undefined : onClick,
-      ...rest,
+      )}
+      disabled={disabled || loading}
+      aria-disabled={disabled || loading}
+      aria-busy={loading}
+      onClick={disabled || loading ? undefined : onClick}
+      {...rest}
     >
       {loading ? (
         <span className="flex items-center justify-center h-4 w-4">
@@ -98,7 +84,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(props => {
       ) : (
         children
       )}
-    </motion.button>
+    </button>
   )
 })
 

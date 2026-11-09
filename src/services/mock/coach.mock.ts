@@ -7,6 +7,7 @@
 
 import { getPendingInvites, getCoachInsights as getCoachInsightsFn } from './joint.mock'
 import { JointPot } from '@/lib/joint-pot'
+import { addKobo, koboToNaira } from '@/lib/money'
 
 export interface CoachInsight {
   id: string
@@ -53,8 +54,7 @@ export function getCoachInsights(
       insights.push({
         id: `insight_${pot.id}_${userId}_1`,
         title: 'Recent contribution',
-        body: `You contributed ₦${koboToNaira(userContributions.reduce(
-          (sum, c) => addKoba(sum, c.amountKobo), 0) / 100} recently toward ${pot.name}`,
+        body: `You contributed ₦${koboToNaira(totalContributed)} recently toward ${pot.name}`,
         type: 'contribution',
         priority: 'medium',
         createdAt: now,
