@@ -1,0 +1,50 @@
+{
+  "name": "bank",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "mascot:build": "bforartists-headless build animate export",
+    "mascot:posters": "bforartists-headless render-posters",
+    "mascot:optimize": "gltf-transform optimize",
+    "mascot:verify": "gltf-transform validate",
+    "mascot": "pnpm mascot:build && pnpm mascot:posters && pnpm mascot:optimize && pnpm mascot:verify"
+  },
+  "allow-scripts": true,
+  "dependencies": {
+    "next": "16.4.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "class-variance-authority": "^0.7.0",
+    "date-fns": "^3.6.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "lucide-react": "^0.433.0",
+    "motion": "^11.0.0",
+    "prettier": "^3.3.2",
+    "playwright": "^1.65.0",
+    "recharts": "^2.12.3",
+    "tailwindcss": "^4",
+    "tailwind-merge": "^0.3.0",
+    "typescript": "^5",
+    "vitest": "^5.1.0",
+    "zod": "^3.23.8",
+    "@hookform/resolvers": "^3.0.0",
+    "react-hook-form": "^7.45.0",
+    "@tanstack/react-query": "^5.51.0",
+    "gsap": "^3.12.2"
+  }
+}

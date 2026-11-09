@@ -1,0 +1,46 @@
+# Market Research - Buy & Build
+
+## Overview
+Lifestyle money-management app for the Nigerian market. Tagline: **Buy What You Love. Build Wealth As You Live.**
+
+## Key Findings
+1. **Salary Split** — Users need rules dividing income between Spending, Savings, and named Goals. Totals must equal exactly 100%.
+2. **Shop & Save** — Purchase-linked contributions (fixed amount, percentage, or round-up) set aside as separate contributions. Not a discount; explicit opt-in required.
+3. **Spend & Invest** — Contributions directed to investment products through licensed partners. Label "Partner-powered".
+4. **Lifestyle Goals** — Rent, car, education, business, holiday, etc., each with target, progress, deadline.
+5. **Wealth Dashboard** — Available to Spend vs Goals, contributions, balances, progress. Savings and investments always visually and textually separate.
+6. **Joint Savings** — Two or more users save together toward one shared goal (rent, wedding, trip, family project, business fund, "ajo/esusu"-style pot).
+
+## Segments & Personas
+- **Alex, 28, Lagos** - Tech product manager, saves for travel and business startup
+- **Tunde, 35, Abuja** - Finance analyst, manages family expenses and rent contributions
+- **Chioma, 24, Port Harcourt** - Freelance designer, irregular income, needs flexible salary split
+
+## Pain Points
+- No integrated money-management tools tailored to Nigerian market
+- Difficulty saving consistently with irregular income
+- Lack of joint savings options for shared goals
+- No visibility into how contributions are allocated
+
+## Opportunities
+- Mobile-first design for high mobile penetration
+- Naira-based operations (kobo precision)
+- Cultural relevance: ajo/esusu-style joint savings
+- Demo-mode prototype for partner validation
+
+## Risks
+- Regulatory compliance with Nigerian financial regulations
+- Trust in digital financial services
+- Data minimization and privacy concerns
+
+## Success Metrics
+- Activation rate (onboarding completion)
+- Repeat use frequency (weekly/Monthly)
+- Contribution frequency (per-user, per-pot)
+- Opt-out rate (salary split, shop & save)
+- Trust score (post-session surveys)
+
+## Open Questions
+- Joint pot approval rule default: majority vs owner-up-to-₦X
+- Rounding strategy for proportional payouts
+- Opt-in flow design for purchase-linked contributions
