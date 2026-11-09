@@ -1,0 +1,85 @@
+/* Tailwind CSS v4 layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Root CSS variables for design tokens (light/dark mode via data attribute or class) */
+:root {
+  --ink: #0B0A14;
+  --surface: #14122A;
+  --raised: #1C1938;
+  --border: #2A2740;
+  --text: #F4F3FF;
+  --muted: #A5A3C4;
+  --accent-violet: #8B5CF6;
+  --accent-indigo: #6366F1;
+  --gold: #F5B83D;
+  --green-growth: #2BD67B;
+  --alert-coral: #FF6B6B;
+  --gold-light: #FBBF24;
+  --green-growth-light: #14b8a6;
+  --alert-coral-light: #F87171;
+}
+
+/* Light mode (class-based or data-attribute activation) */
+html.light {
+  --ink: #0B0A14;
+  --surface: #FFFFFF;
+  --raised: #F0EFF5;
+  --border: #D1D5DB;
+  --text: #111827;
+  --muted: #6B7280;
+  --accent-violet: #A78bfa;
+  --gold-light: #FBBF24;
+  --green-growth-light: #14b8a6;
+  --alert-coral-light: #F87171;
+}
+
+/* Dark mode (default) */
+html.dark {
+  --ink: #0B0A14;
+  --surface: #14122A;
+  --raised: #1C1938;
+  --border: #2A2740;
+  --text: #F4F3FF;
+  --muted: #A5A3C4;
+  --accent-violet: #8B5CF6;
+  --gold-light: #FBBF24;
+  --green-growth-light: #14b8a6;
+  --alert-coral-light: #F87171;
+}
+
+/* Background transitions */
+@media (prefers-color-scheme: light) {
+  html.light {
+    --background: #F8F5F1;
+    --foreground: #111827;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html.dark {
+    --background: #0B0A14;
+    --foreground: #F4F3FF;
+  }
+}
+
+body {
+  font-family: 'Sora', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-os-font-smoothing: antialiased;
+}
+
+/* Tabular numerals for all money amounts */
+.money {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .no-reduce * {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
