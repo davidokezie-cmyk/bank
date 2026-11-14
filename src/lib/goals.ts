@@ -12,7 +12,7 @@
  * - target reached
  */
 
-import { nairaToKobo, koboToNaira, addKobo, multiplyKobo } from './money'
+import { nairaToKobo, addKobo } from './money'
 
 export type GoalCategory = 'rent' | 'car' | 'education' | 'business' | 'holiday'
 
@@ -129,7 +129,7 @@ export function validateGoal(goal: Goal): { valid: boolean; errors: string[] } {
   const errors: string[] = []
 
   if (goal.targetKobo <= 0) {
-    errors.push('Target amount must be greater than zero')
+    errors.push('target amount must be greater than zero')
   }
 
   if (goal.currentKobo < 0) {

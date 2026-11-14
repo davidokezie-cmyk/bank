@@ -13,5 +13,3 @@ export const sora = Sora({
   variable: '--font-sora',
   display: 'swap',
 })
-
-export default { inter, sora }

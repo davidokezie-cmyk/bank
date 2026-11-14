@@ -5,20 +5,19 @@ import {
   roundUpToHundred,
   roundDownToHundred,
   exampleCanonicalCase,
-  ShopSaveRuleType,
 } from '@/lib/shop-save'
 import { nairaToKobo } from '@/lib/money'
 
 describe('Shop & Save - Pure Functions', () => {
   describe('calculateContribution', () => {
-    const fixedRule = createShopSaveRule('fixed', 2000, true) // ₦2,000 fixed
+    const fixedRule = createShopSaveRule('fixed', nairaToKobo(2000), true) // ₦2,000 fixed
     const percentageRule = createShopSaveRule('percentage', 5, true) // 5%
     const roundUpRule = createShopSaveRule('round_up', 100, true) // round up to ₦100
 
     it('should calculate fixed contribution', () => {
       const result = calculateContribution(nairaToKobo(50000), fixedRule)
       expect(result).not.toBeNull()
-      expect(result!.contributionKobo).toBe(2000)
+      expect(result!.contributionKobo).toBe(nairaToKobo(2000))
       expect(result!.method).toBe('fixed')
     })
 
@@ -30,7 +29,7 @@ describe('Shop & Save - Pure Functions', () => {
     it('should calculate percentage contribution (₦40,000 @ 5% = ₦2,000)', () => {
       const result = calculateContribution(nairaToKobo(40000), percentageRule)
       expect(result).not.toBeNull()
-      expect(result!.contributionKobo).toBe(2000)
+      expect(result!.contributionKobo).toBe(nairaToKobo(2000))
       expect(result!.method).toBe('percentage')
       expect(result!.description).toContain('₦2,000')
     })
@@ -40,7 +39,7 @@ describe('Shop & Save - Pure Functions', () => {
       const purchaseKobo = nairaToKobo(40370)
       const result = calculateContribution(purchaseKobo, roundUpRule)
       expect(result).not.toBeNull()
-      expect(result!.contributionKobo).toBe(30)
+      expect(result!.contributionKobo).toBe(nairaToKobo(30))
       expect(result!.method).toBe('round_up')
     })
 
@@ -75,7 +74,7 @@ describe('Shop & Save - Pure Functions', () => {
 
   it('should pass the canonical example: ₦40,000 @ 5% = ₦2,000', () => {
     const { contribution } = exampleCanonicalCase()
-    expect(contribution.contributionKobo).toBe(2000)
+    expect(contribution.contributionKobo).toBe(nairaToKobo(2000))
     expect(contribution.method).toBe('percentage')
   })
 

@@ -82,8 +82,9 @@ export function getInvestmentProduct(id: string): InvestmentProduct | undefined 
 export function makeInvestmentContribution(
   productId: string,
   amountKobo: number,
-  userId: string
+  _userId: string
 ): { success: boolean; newValueKobo: number; message: string } {
+  void _userId
   const product = getInvestmentProduct(productId)
 
   if (!product) {

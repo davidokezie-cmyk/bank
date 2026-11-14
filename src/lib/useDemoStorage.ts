@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useMemo, useState, useSyncExternalStore } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
 const missingValue = '\u0000missing'
@@ -37,13 +37,13 @@ export function useDemoStorage<T>(
   ready: boolean
   storageError: string | null
 } {
-  const initialValueRef = useRef(initialValue)
+  const [initialState] = useState(initialValue)
   const subscribeToKey = useCallback((callback: () => void) => subscribe(key, callback), [key])
   const snapshot = useSyncExternalStore(subscribeToKey, () => getSnapshot(key), () => null)
   const parsed = useMemo(() => {
     if (snapshot === null || snapshot === missingValue || snapshot === readError) {
       return {
-        value: initialValueRef.current,
+        value: initialState,
         error: snapshot === readError ? 'Demo data could not be loaded from this browser.' : null,
       }
     }
@@ -51,9 +51,9 @@ export function useDemoStorage<T>(
       return { value: JSON.parse(snapshot) as T, error: null }
     } catch (error) {
       console.error(`Could not parse demo data for "${key}"`, error)
-      return { value: initialValueRef.current, error: 'Saved demo data is invalid and could not be loaded.' }
+      return { value: initialState, error: 'Saved demo data is invalid and could not be loaded.' }
     }
-  }, [key, snapshot])
+  }, [key, snapshot, initialState])
   const [writeError, setWriteError] = useState<string | null>(null)
 
   const setValue = useCallback<Dispatch<SetStateAction<T>>>((nextValue) => {

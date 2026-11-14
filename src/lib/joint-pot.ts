@@ -120,7 +120,7 @@ export interface JointNotification {
   type: 'invite' | 'contribution' | 'withdrawal_request' | 'withdrawal_vote' | 'milestone' | 'member_left' | 'pot_closed'
   title: string
   body: string
-  data?: Record<string, any>
+    data?: Record<string, unknown>
   read: boolean
   createdAt: number
 }
@@ -793,7 +793,7 @@ export function examplePot3PersonMajority(): JointPot {
   if (pot.currentKobo > 0) {
     // Contributions would be added via the contribute function
     // For the example, just set the current balance
-    ;(pot as any).currentKobo = nairaToKobo(75000)
+    pot.currentKobo = nairaToKobo(75000)
   }
   
   return pot
@@ -818,7 +818,7 @@ export function examplePot2PersonOwnerUpTo(): JointPot {
   
   // Set some contributions
   if (pot.currentKobo > 0) {
-    ;(pot as any).currentKobo = nairaToKobo(150000)
+    pot.currentKobo = nairaToKobo(150000)
   }
   
   return pot

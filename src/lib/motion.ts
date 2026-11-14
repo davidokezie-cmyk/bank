@@ -69,4 +69,3 @@ export const springCss = {
 export function useHover(): [boolean, (nextState: boolean) => void] {
   return useState(false)
 }
-'use client'

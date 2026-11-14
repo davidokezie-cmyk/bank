@@ -112,7 +112,7 @@ export function removeRule(
   const sum = rebalanced.reduce((acc, r) => acc + r.allocationPercentage, 0)
   if (sum !== 100) {
     const maxIndex = rebalanced.findIndex(
-      (r, i) => r.allocationPercentage === Math.max(...rebalanced.map(x => x.allocationPercentage))
+      (r) => r.allocationPercentage === Math.max(...rebalanced.map(x => x.allocationPercentage))
     )
     rebalanced[maxIndex].allocationPercentage += 100 - sum
   }
@@ -299,8 +299,6 @@ export function exampleCanonicalCase(): {
   ]
 
   const allocations = allocateSalary(totalNaira, rules)
-  const goalKobo = allocations.goal // Should be 8000 (₦40,000 @ 20% = ₦8,000 = 8000 kobo)
-
   const fivePctGoalKobo = percentageOfKobo(nairaToKobo(totalNaira), 5)
 
   return {

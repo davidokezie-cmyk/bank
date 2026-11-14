@@ -16,7 +16,7 @@
  * - pause/change/opt-out at any time
  */
 
-import { nairaToKobo, koboToNaira, addKobo, multiplyKobo, percentageOfKobo } from './money'
+import { nairaToKobo, formatKobo, multiplyKobo } from './money'
 
 export type ShopSaveRuleType = 'fixed' | 'percentage' | 'round_up'
 
@@ -82,7 +82,7 @@ export function calculateContribution(
         return {
           contributionKobo: contribution,
           method: 'fixed',
-          description: `₦${koboToNaira(contribution)} fixed contribution`,
+          description: `${formatKobo(contribution)} fixed contribution`,
         }
       }
       return null
@@ -95,7 +95,7 @@ export function calculateContribution(
         return {
           contributionKobo: contribution,
           method: 'percentage',
-          description: `${rule.ruleValue}% of ₦${koboToNaira(purchaseKobo)} = ₦${koboToNaira(contribution)}`,
+          description: `${rule.ruleValue}% of ${formatKobo(purchaseKobo)} = ${formatKobo(contribution)}`,
         }
       }
       return null
@@ -109,7 +109,7 @@ export function calculateContribution(
         return {
           contributionKobo: roundUpContribution,
           method: 'round_up',
-          description: `Round-up from ₦${koboToNaira(purchaseKobo)} to ₦${koboToNaira(roundedUpKobo)} = ₦${koboToNaira(roundUpContribution)}`,
+          description: `Round-up from ${formatKobo(purchaseKobo)} to ${formatKobo(roundedUpKobo)} = ${formatKobo(roundUpContribution)}`,
         }
       }
       return null
@@ -134,11 +134,11 @@ export function validateShopSaveRule(rule: ShopSaveRule): { valid: boolean; erro
   }
 
   if (rule.ruleType === 'percentage' && (rule.ruleValue < 0 || rule.ruleValue > 100)) {
-    errors.push('Percentage must be between 0 and 100')
+    errors.push('percentage must be between 0 and 100')
   }
 
   if (rule.ruleType === 'round_up' && rule.ruleValue !== 100) {
-    errors.push('Round-up base must be ₦100')
+    errors.push('round-up base must be ₦100')
   }
 
   return {
