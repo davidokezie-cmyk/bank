@@ -11,8 +11,8 @@ import {
   Target,
   Users,
 } from 'lucide-react'
-import { KoboProcedural } from '@/components/three/KoboProcedural'
-import { useReducedMotion } from '@/lib/motion'
+import { KoboDynamic } from '@/components/three/KoboDynamic'
+
 import { formatKobo, nairaToKobo } from '@/lib/money'
 import { calculateAvailableToSpend, SalarySplitRule } from '@/lib/salary-split'
 import { useDemoStorage } from '@/lib/useDemoStorage'
@@ -54,7 +54,7 @@ const toneClasses: Record<string, string> = {
 }
 
 export default function Dashboard() {
-  const reducedMotion = useReducedMotion()
+
   const { value: split } = useDemoStorage('buy-build:salary-split', defaultSalarySplit)
   const { value: goals } = useDemoStorage<Goal[]>('buy-build:goals', [])
   const { value: pots } = useDemoStorage<DemoPot[]>('buy-build:pots', defaultPots)
@@ -160,7 +160,7 @@ export default function Dashboard() {
         </div>
 
         <div className="glass p-6">
-          <KoboProcedural progress={koboProgress} reducedMotion={reducedMotion} />
+          <KoboDynamic mood="idle" progress={koboProgress} className="mx-auto h-44 w-full sm:h-48" />
           <p className="mt-2 text-center text-sm text-[var(--muted)]">
             {goals.length > 0
               ? `${goalProgress}% of your goal targets reached.`

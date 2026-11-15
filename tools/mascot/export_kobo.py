@@ -148,106 +148,45 @@ def main():
             print(f"GLB export failed: {e}")
     
     # ============================================================
-    # Export Lite GLB: kobo-lite.glb (≤ 8k tris via Decimate)
+    # Export Lite GLB: kobo-lite.glb (same selection; model is ~6k tris)
     # ============================================================
-    
+
     if export_lite:
         lite_glb_path = os.path.join(
             os.path.dirname(__file__), "..", "..", "public", "models", "kobo-lite.glb"
         )
-        
+
         os.makedirs(os.path.dirname(lite_glb_path), exist_ok=True)
-        
-        print(f"Exporting lite GLB to: {lite_glb_path}")
-        
-        # Strategy: Duplicate the body, apply Decimate modifier to reduce triangles
+
         bpy.ops.object.select_all(action='DESELECT')
-        
-        if body_name:
-            body_orig = bpy.data.objects[body_name]
-            body_orig.select_set(True)
-            bpy.context.view_layer.objects.active = body_orig
-            
-            # Duplicate for decimation
-            bpy.ops.object.duplicate()
-            body_dec = bpy.context.active_object
-            body_dec.name = "Kobo_Body_Decimated"
-            
-            # Add Decimate modifier (DISSOLVE to reduce triangles)
-            mod_decimate = body_dec.modifiers.new(name="Decimate", type='DECIMATE')
-            mod_decimate.decimate_type = 'DISSOLVE'
-            mod_decimate.ratio = 0.3  # Reduce to ~30% of original triangles
-            
-            # Apply the modifier
-            bpy.ops.object.modifier_apply(modifier="Decimate")
-            
-            # Select only the decimated body for export
-            bpy.ops.object.select_all(action='DESELECT')
-            body_dec.select_set(True)
-            bpy.context.view_layer.objects.active = body_dec
-            
-            # Export
-            try:
-                bpy.ops.export_scene.gltf(
-                    filepath=lite_glb_path,
-                    export_format='GLB',
-                    use_selection=True,
-                    export_materials='EXPORT',
-                    export_animations=True,
-                    export_nla_strips=False,
-                    export_yup=True,
-                    export_apply=True,
-                )
-                
-                file_size = os.path.getsize(lite_glb_path)
-                print(f"Lite GLB exported successfully!")
-                print(f"  File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
-                
-            except RuntimeError as e:
-                print(f"Lite GLB export failed: {e}")
-                # Fallback: export the original without decimation
-                bpy.ops.object.select_all(action='DESELECT')
-                if body_name:
-                    body_orig.select_set(True)
-                    bpy.context.view_layer.objects.active = body_orig
-                    bpy.ops.export_scene.gltf(
-                        filepath=lite_glb_path,
-                        export_format='GLB',
-                        use_selection=True,
-                        export_materials='EXPORT',
-                        export_animations=True,
-                        export_yup=True,
-                        export_apply=True,
-                    )
-                    file_size = os.path.getsize(lite_glb_path)
-                    print(f"Fallback GLB exported: {file_size:,} bytes")
-        else:
-            print("No Kobo_Body object found for decimation")
-            # Export full version as fallback
-            if export_full:
-                bpy.ops.object.select_all(action='DESELECT')
-                objects_to_select = []
-                if body_name:
-                    objects_to_select.append(bpy.data.objects[body_name])
-                if 'Kobo_Root' in bpy.data.objects:
-                    objects_to_select.append(bpy.data.objects['Kobo_Root'])
-                if 'BlockStack' in bpy.data.objects:
-                    objects_to_select.append(bpy.data.objects['BlockStack'])
-                for o in objects_to_select:
-                    o.select_set(True)
-                bpy.context.view_layer.objects.active = objects_to_select[0] if objects_to_select else None
-                bpy.ops.export_scene.gltf(
-                    filepath=lite_glb_path,
-                    export_format='GLB',
-                    use_selection=True,
-                    export_materials='EXPORT',
-                    export_animations=True,
-                    export_yup=True,
-                    export_apply=True,
-                )
-                file_size = os.path.getsize(lite_glb_path)
-                print(f"Fallback GLB exported: {file_size:,} bytes")
-    
+        lite_objects = [ob for ob in bpy.data.objects if ob.type in ('MESH', 'EMPTY', 'ARMATURE')]
+        for ob in lite_objects:
+            ob.select_set(True)
+        for ob in bpy.data.objects:
+            if ob.type in ('CAMERA', 'LIGHT'):
+                ob.select_set(False)
+        if lite_objects:
+            bpy.context.view_layer.objects.active = lite_objects[0]
+
+        print(f"Exporting lite GLB to: {lite_glb_path}")
+
+        try:
+            bpy.ops.export_scene.gltf(
+                filepath=lite_glb_path,
+                export_format='GLB',
+                use_selection=True,
+                export_materials='EXPORT',
+                export_animations=True,
+                export_nla_strips=False,
+                export_yup=True,
+                export_apply=True,
+            )
+            file_size = os.path.getsize(lite_glb_path)
+            print(f"Lite GLB exported successfully!")
+            print(f"  File size: {file_size:,} bytes ({file_size/1024:.1f} KB)")
+        except RuntimeError as e:
+            print(f"Lite GLB export failed: {e}")
+
     # ============================================================
     # Post-export: Run gltf-transform optimize
     # ============================================================

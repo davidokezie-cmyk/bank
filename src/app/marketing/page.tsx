@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { KoboProcedural } from '@/components/three/KoboProcedural'
+import { KoboDynamic } from '@/components/three/KoboDynamic'
 import { MarketingMotion } from '@/components/marketing/MarketingMotion'
 import { ShopSaveCalculator } from '@/components/marketing/ShopSaveCalculator'
 
@@ -145,7 +145,7 @@ export default function Home() {
                       On track
                     </span>
                   </div>
-                  <KoboProcedural progress={0.45} />
+                  <KoboDynamic mood="wave" progress={0.45} className="mx-auto h-56 w-full sm:h-64" />
                   <div className="mt-4 space-y-3">
                     {[
                       ['Rent goal', '40%', 'bg-[var(--gold)]'],

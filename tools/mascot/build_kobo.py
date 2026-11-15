@@ -36,7 +36,7 @@ def main():
         if block.type == 'MESH':
             bpy.data.objects.remove(block, do_unlink=True)
 
-    gold_mat = make_material('Kobo_Gold', (0.89, 0.71, 0.32), 0.85, 0.22)
+    gold_mat = make_material('Kobo_Gold', (0.89, 0.71, 0.32), 0.4, 0.45)
     eye_mat = make_material('Kobo_Eye', (0.04, 0.03, 0.02), 0.0, 0.1)
     cheek_mat = make_material('Kobo_Cheek', (0.88, 0.38, 0.37), 0.0, 0.6)
     slate_mat = make_material('Kobo_Slate', (0.274, 0.325, 0.428), 0.1, 0.75)
@@ -53,15 +53,15 @@ def main():
     # ============================================================
     # Body - gold coin sphere at feet origin
     # ============================================================
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, segments=48, ring_count=24, location=(0, 0, 0.5))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, segments=32, ring_count=16, location=(0, 0, 0.5))
     body = bpy.context.active_object
     body.name = 'Body'
     bevel = body.modifiers.new(name='Bevel', type='BEVEL')
     bevel.width = 0.06
-    bevel.segments = 3
+    bevel.segments = 2
     subdiv = body.modifiers.new(name='Subdiv', type='SUBSURF')
-    subdiv.levels = 2
-    subdiv.render_levels = 2
+    subdiv.levels = 1
+    subdiv.render_levels = 1
     body.data.materials.append(gold_mat)
 
     # ============================================================
@@ -188,7 +188,23 @@ def main():
         block['is_kobo_block'] = True
         block.parent = block_stack
         mat = make_material(f'Block_{index + 1}_Mat', block_palette[index % len(block_palette)], 0.2, 0.55)
-        block.data.materials.append(mat)
+        block.data.materials.append(mat)  # unique per block so memberColors can tint at runtime
+
+    # ============================================================
+    # Apply ALL modifiers now, before shape keys exist
+    # (modifiers cannot be applied to a mesh with shape keys)
+    # ============================================================
+    mesh_objects = [obj for obj in bpy.data.objects if obj.type == 'MESH']
+    for obj in mesh_objects:
+        bpy.ops.object.select_all(action='DESELECT')
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        for mod in list(obj.modifiers):
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+        try:
+            bpy.ops.object.shade_smooth()
+        except Exception:
+            pass
 
     # ============================================================
     # Shape keys (morph targets required by the contract)

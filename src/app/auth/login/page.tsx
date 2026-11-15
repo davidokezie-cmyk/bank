@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { KoboDynamic } from '@/components/three/KoboDynamic'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -14,7 +15,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <section className="glass-lg w-full max-w-lg p-6 sm:p-10">
-        <Link href="/" className="text-sm font-semibold text-[var(--gold-strong)]">Buy & Build</Link>
+        <KoboDynamic mood="wave" progress={0.6} className="mx-auto h-48 w-full" />
+        <Link href="/" className="mt-4 inline-block text-sm font-semibold text-[var(--gold-strong)]">Buy & Build</Link>
         <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold-strong)]">Buy What You Love. Build Wealth As You Live.</p>
         <h1 className="mt-3 text-3xl font-semibold text-[var(--text)]">Welcome back</h1>
         <p className="mt-3 text-sm leading-6 text-[var(--muted)]">This prototype runs in demo mode. No password, BVN, NIN, card number, or real bank details are collected.</p>
