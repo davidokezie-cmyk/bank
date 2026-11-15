@@ -44,11 +44,8 @@ def main():
     # Find and set the active object (Body/Koba_Body)
     # ============================================================
     
-    target_obj = None
-    if 'Kobo_Body' in bpy.data.objects:
-        target_obj = bpy.data.objects['Kobo_Body']
-    elif 'Body' in bpy.data.objects:
-        target_obj = bpy.data.objects['Body']
+    target_obj = bpy.data.objects.get('Kobo_Body') or bpy.data.objects.get('Body')
+    body_name = target_obj.name if target_obj else None
     
     if target_obj:
         # Set as active object in view layer
@@ -82,11 +79,8 @@ def main():
     for ob in mesh_objects:
         ob.select_set(True)
         bpy.context.view_layer.objects.active = ob
-        
-        # Apply all modifiers except ARMATURE
-        for mod in ob.modifiers:
-            if mod.type in ('SUBSURF', 'BEVEL', 'MIRROR'):
-                bpy.ops.object.modifier_apply(modifier=mod.name)
+        # Modifiers are applied by export_apply=True at export time;
+        # applying them here would fail on meshes with shape keys.
     
     # Deselect after applying
     bpy.ops.object.select_all(action='DESELECT')
@@ -110,21 +104,19 @@ def main():
         # Ensure directory exists
         os.makedirs(os.path.dirname(full_glb_path), exist_ok=True)
         
-        # Select key objects: body, armature, block stack
+        # Select everything that belongs to the mascot: all meshes,
+        # empties (Head, BlockStack) and the Kobo_Root armature.
         bpy.ops.object.select_all(action='DESELECT')
-        
+
         objects_to_select = []
-        if 'Kobo_Body' in bpy.data.objects:
-            objects_to_select.append(bpy.data.objects['Kobo_Body'])
-        if 'Armature' in bpy.data.objects:
-            objects_to_select.append(bpy.data.objects['Armature'])
-        if 'BlockStack' in bpy.data.objects:
-            objects_to_select.append(bpy.data.objects['BlockStack'])
-        
+        for ob in bpy.data.objects:
+            if ob.type in ('MESH', 'EMPTY', 'ARMATURE'):
+                objects_to_select.append(ob)
+
         for o in objects_to_select:
             o.select_set(True)
-        
-        # Deselect camera and lights
+
+        # Deselect camera and lights (they were never in the selection)
         for ob in bpy.data.objects:
             if ob.type in ('CAMERA', 'LIGHT'):
                 ob.select_set(False)
@@ -141,7 +133,7 @@ def main():
                 filepath=full_glb_path,
                 export_format='GLB',
                 use_selection=True,
-                export_materials='NONE',  # Export as mesh only
+                export_materials='EXPORT',
                 export_animations=True,  # All actions
                 export_nla_strips=False,
                 export_yup=True,  # Convert from Z-up (blender) to Y-up (glTF)
@@ -171,8 +163,8 @@ def main():
         # Strategy: Duplicate the body, apply Decimate modifier to reduce triangles
         bpy.ops.object.select_all(action='DESELECT')
         
-        if 'Kobo_Body' in bpy.data.objects:
-            body_orig = bpy.data.objects['Kobo_Body']
+        if body_name:
+            body_orig = bpy.data.objects[body_name]
             body_orig.select_set(True)
             bpy.context.view_layer.objects.active = body_orig
             
@@ -200,7 +192,7 @@ def main():
                     filepath=lite_glb_path,
                     export_format='GLB',
                     use_selection=True,
-                    export_materials='NONE',
+                    export_materials='EXPORT',
                     export_animations=True,
                     export_nla_strips=False,
                     export_yup=True,
@@ -215,14 +207,14 @@ def main():
                 print(f"Lite GLB export failed: {e}")
                 # Fallback: export the original without decimation
                 bpy.ops.object.select_all(action='DESELECT')
-                if 'Kobo_Body' in bpy.data.objects:
+                if body_name:
                     body_orig.select_set(True)
                     bpy.context.view_layer.objects.active = body_orig
                     bpy.ops.export_scene.gltf(
                         filepath=lite_glb_path,
                         export_format='GLB',
                         use_selection=True,
-                        export_materials='NONE',
+                        export_materials='EXPORT',
                         export_animations=True,
                         export_yup=True,
                         export_apply=True,
@@ -235,10 +227,10 @@ def main():
             if export_full:
                 bpy.ops.object.select_all(action='DESELECT')
                 objects_to_select = []
-                if 'Kobo_Body' in bpy.data.objects:
-                    objects_to_select.append(bpy.data.objects['Kobo_Body'])
-                if 'Armature' in bpy.data.objects:
-                    objects_to_select.append(bpy.data.objects['Armature'])
+                if body_name:
+                    objects_to_select.append(bpy.data.objects[body_name])
+                if 'Kobo_Root' in bpy.data.objects:
+                    objects_to_select.append(bpy.data.objects['Kobo_Root'])
                 if 'BlockStack' in bpy.data.objects:
                     objects_to_select.append(bpy.data.objects['BlockStack'])
                 for o in objects_to_select:
@@ -248,7 +240,7 @@ def main():
                     filepath=lite_glb_path,
                     export_format='GLB',
                     use_selection=True,
-                    export_materials='NONE',
+                    export_materials='EXPORT',
                     export_animations=True,
                     export_yup=True,
                     export_apply=True,

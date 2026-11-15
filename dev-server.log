@@ -6,3 +6,4 @@
 - Cache Components enabled
 - Partial Prefetching enabled
 
+  Reload env: .env.local
