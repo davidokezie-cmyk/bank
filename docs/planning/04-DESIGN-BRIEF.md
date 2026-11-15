@@ -9,36 +9,50 @@
 
 ## Colour Tokens (CSS Variables / Tailwind)
 
+**Visual language: refined glass on deep navy.** Frosted panels, 1px translucent borders, layered depth shadows. No gradients on interactive elements, no neon glows, no purple anywhere in the interface. Member-identity colours (block tower) may use a restrained palette including one steel blue, but never violet/magenta UI accents. Light mode is a first-class restyle of the same system, not an afterthought.
+
 ### Dark Mode (Primary)
-- `ink`: `#0B0A14` — background, deepest tone
-- `surface`: `#14122A` — cards, panels, surfaces
-- `raised`: `#1C1938` — elevated surfaces, modals
-- `border`: `#2A2740` — form borders, dividers
-- `text`: `#F4F3FF` — primary text
-- `muted`: `#A5A3C4` — secondary text, captions
-- `accent-violet`: `#8B5CF6` — primary actions, hero glow
-- `accent-indigo`: `#6366F1` — secondary actions, depth
-- `gold`: `#F5B83D` — coins, rewards, "Build" moments
-- `green-growth`: `#2BD67B` — growth, positive amounts, progress
-- `alert-coral`: `#FF6B6B` — alerts, errors, warnings
+- `ink`: `#0A0E1A` — background, deep navy
+- `surface`: `#101623` — cards, panels (solid fallback below the frost)
+- `raised`: `#182031` — elevated surfaces, modals
+- `border`: `#24304A` — form borders, dividers
+- `text`: `#E8ECF3` — soft white, primary text
+- `muted`: `#8A94A8` — secondary text, captions
+- `gold`: `#E3B452` — coins, rewards, "Build" moments; primary CTA fill (always paired with ink text)
+- `gold-strong`: `#F2C06B` — gold text on dark, on-track pills
+- `green-growth`: `#33D17A` — growth, positive amounts, progress
+- `alert-coral`: `#E0605F` — alerts, errors, warnings
+- `ring`: `#E3B452` — focus rings
+- `glass-bg`: `rgba(255,255,255,0.04)` — frosted panel fill over ink
+- `glass-border`: `rgba(232,236,243,0.10)` — 1px refined border
+- `shadow-glass`: `0 16px 48px -16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)` — depth + top highlight
+- Aurora backdrop (static, non-violet): `radial-gradient(1100px 560px at 78% -8%, #131F33 0%, transparent 60%)`
 
 ### Light Mode
-- `ink-light`: `#F8F5F1` — background
+- `ink-light`: `#F5F6FA` — background
 - `surface-light`: `#FFFFFF` — cards, panels
-- `raised-light`: `#F0EFF5` — elevated surfaces
-- `border-light`: `#D1D5DB` — form borders
-- `text-light`: `#111827` — primary text
-- `muted-light`: `#6B7280` — secondary text
-- `accent-violet-light`: `#A78bfa` — primary actions
-- `gold-light`: `#FBBF24` — coins, rewards
-- `green-growth-light`: `#14b8a6` — growth
-- `alert-coral-light`: `#F87171` — alerts
+- `raised-light`: `#ECEEF4` — elevated surfaces
+- `border-light`: `#D5D9E4` — form borders
+- `text-light`: `#131A2A` — deep navy text
+- `muted-light`: `#55607A` — secondary text
+- `gold`: `#E3B452` — CTA fill (ink text); `gold-text`: `#8A5A00` — gold text on white
+- `green-growth-light`: `#137A45` — growth
+- `alert-coral-light`: `#B42318` — alerts
+- `glass-bg-light`: `rgba(255,255,255,0.72)` — frost over `#F5F6FA`
+- `shadow-glass-light`: `0 16px 40px -20px rgba(19,26,42,0.35), inset 0 1px 0 rgba(255,255,255,0.9)`
+
+### Glass system rules
+- Blur: `blur(8px)` panels, `blur(14px)` max for sheets/overlays. Never stack more than two blurred layers.
+- Surfaces must remain fully legible if `backdrop-filter` fails: the solid `surface` fill sits under every frost.
+- Mobile and `prefers-reduced-transparency` get solid `raised` surfaces (no blur).
+- No `background-clip: text` gradients. No glow shadows. No purple/violet/magenta hex anywhere in `src/`.
 
 **Contrast ratios** (AA for normal text, AAA for large text):
-- `ink` / `text`: 8.5:1 ✓
-- `surface` / `text`: 13:1 ✓
-- `alert-coral` / `surface`: 3:1 → use white text on coral for alerts
-- `gold` / `surface`: 3:1 → use dark text or icon-only
+- `ink` / `text`: 15:1 ✓
+- `ink` / `gold` (CTA): 9.6:1 ✓
+- `surface` / `muted`: 5.4:1 ✓
+- `alert-coral` / `surface`: 4.9:1 ✓ (`#E0605F` on `#101623`) → white text on coral only for large text; use coral text + icon otherwise
+- `gold` / `surface`: 8.8:1 ✓
 
 ## Type Families / Scale / Numerals
 
@@ -60,12 +74,12 @@
 ## Spacing, Radius, Elevation, Grid
 
 - **Spacing scale** (step + unit): `0`, `0.5` (4px), `1` (8px), `2` (16px), `3` (24px), `4` (32px), `6` (48px), `8` (64px)
-- **Radius**: `radius-sm` (8px), `radius-md` (12px), `radius-lg` (16px), `radius-full` (9999px)
-- **Elevation** (shadow tokens):
-  - `shadow-sm` (0 1px 2px rgba(0,0,0,0.3))
-  - `shadow-md` (0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06))
-  - `shadow-lg` (0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05))
-  - `shadow-inset` for modals/panels
+- **Radius**: `radius-sm` (10px), `radius-md` (14px), `radius-lg` (18px), `radius-xl` (24px), `radius-full` (9999px)
+- **Elevation** (glass shadow tokens):
+  - `shadow-glass-sm` (0 4px 16px -8px rgba(0,0,0,0.5))
+  - `shadow-glass` (0 16px 48px -16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06))
+  - `shadow-glass-lg` (0 28px 80px -24px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08)) — sheets, modals
+  - `shadow-raised-light` for light mode per the light tokens above
 - **Grid**: 12-column, `gap-4` (16px), `gap-6` (24px)
 - **Max-width**: `max-w-7xl` (1440px), `max-w-md` (medium screens)
 
@@ -108,13 +122,13 @@
 - **Rounded, gold-trimmed coin body** (kobo = Nigeria's currency subunit)
 - **Height**: ~1.0 metre in glTF units (Y-up, faces +Z)
 - **Width**: proportionally smaller, circular-ish torso
-- **Strap**: small shopping-bag strap like a backpack, violet colour
+- **Strap**: small shopping-bag strap like a backpack, muted slate colour
 - **Blocks**: stacking tiny building blocks (building blocks = "Buy + Back")
 - **Origin**: at the feet
 
 ### Materials
 - **Body**: Principled BSDF, gold metallic, 0.85 base color, 0.5 clearcoat, 0.3 metallic roughness
-- **Strap**: Principled BSDF, violet hue, matte finish (no clearcoat)
+- **Strap**: Principled BSDF, muted slate (`#46536E`), matte finish (no clearcoat)
 - **Eyes**: cream colour (`#FFF5E6`), slight emissive highlight for "alive" look
 - **Blocks**: pastel colour set, one colour per joint pot member
 
@@ -141,7 +155,7 @@
 - **No glasses** on Kobo (NovaPay character had glasses)
 - **No chain** around neck
 - **Different pose**: Kobo stands confidently, not leaning
-- **Different colour palette**: gold + violet vs NovaPay's distinct scheme
+- **Different colour palette**: gold + slate vs NovaPay's distinct scheme
 - **No NovaPay logo or branding anywhere**
 - **Block tower** is unique to Buy & Build joint pots concept
 

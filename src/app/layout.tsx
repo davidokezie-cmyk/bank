@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0B0A14' },
-    { media: '(prefers-color-scheme: light)', color: '#F7F5FB' },
+    { media: '(prefers-color-scheme: dark)', color: '#0A0E1A' },
+    { media: '(prefers-color-scheme: light)', color: '#F5F6FA' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="relative z-0 flex min-h-full flex-col bg-[var(--ink)] font-ui text-[var(--text)]">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--gold)] focus:px-4 focus:py-2 focus:font-semibold focus:text-[#0B0A14]"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--gold)] focus:px-4 focus:py-2 focus:font-semibold focus:text-[#131A2A]"
         >
           Skip to content
         </a>

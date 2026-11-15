@@ -1,65 +1,87 @@
-import React, { forwardRef } from 'react'
+'use client'
+
+import React, { forwardRef, useRef } from 'react'
 import { cn } from '@/lib/utils'
 
-/**
- * Tabs component with states:
- * default, single, with indicator
- * Clickable tab items with selection state
- */
-export interface TabsProps {
+export interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   /** Currently selected tab value */
   value: string
-  /** On value change callback */
+  /** Called with the newly selected tab value */
   onValueChange: (value: string) => void
-  /** Tab items */
+  /** Tab buttons; each child must carry a `value` prop */
   children: React.ReactNode
-  /** Whether to show indicator */
-  showIndicator?: boolean
-  /** Additional className */
+}
+
+type TabChildProps = {
+  value: string
+  role?: string
+  'aria-selected'?: boolean
+  tabIndex?: number
   className?: string
+  onClick?: () => void
 }
 
-interface TabChildProps extends React.HTMLAttributes<HTMLButtonElement> {
-  value?: string
-  selected?: boolean
-  onValueChange?: (value: string) => void
-}
+export const Tab = forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { value: string }>(
+  function Tab({ value, className, ...rest }, ref) {
+    return <button ref={ref} type="button" data-tab-value={value} className={className} {...rest} />
+  },
+)
+Tab.displayName = 'Tab'
 
+/**
+ * Accessible tabs: role="tablist", arrow-key navigation, roving tabindex.
+ */
 export const Tabs = forwardRef<HTMLDivElement, TabsProps>((props, ref) => {
-  const { value, onValueChange, children, showIndicator = true, className } = props
+  const { value, onValueChange, children, className, ...rest } = props
+  const listRef = useRef<HTMLDivElement>(null)
+
+  const values = React.Children.toArray(children)
+    .filter(React.isValidElement)
+    .map((child) => (child.props as { value?: string }).value)
+    .filter((item): item is string => typeof item === 'string')
+
+  function moveFocus(direction: 1 | -1) {
+    const current = values.indexOf(value)
+    if (current === -1 || values.length === 0) return
+    const next = (current + direction + values.length) % values.length
+    onValueChange(values[next])
+    listRef.current
+      ?.querySelector<HTMLButtonElement>(`[data-tab-value="${CSS.escape(values[next])}"]`)
+      ?.focus()
+  }
 
   return (
-    <div ref={ref} className={cn(
-      'w-full border-b border-border select-none',
-      className,
-    )}>
-      <div className="flex space-x-1" role="tablist">
-        {React.Children.map(children, (child, index) => {
+    <div ref={ref} className={cn('w-full', className)} {...rest}>
+      <div
+        ref={listRef}
+        role="tablist"
+        className="flex gap-1 border-b border-[var(--border)]"
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            moveFocus(1)
+          } else if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            moveFocus(-1)
+          }
+        }}
+      >
+        {React.Children.map(children, (child) => {
           if (!React.isValidElement<TabChildProps>(child)) return child
-          const childValue = child.props.value ?? `tab-${index}`
-          const isActive = childValue === value
-          
+          const isActive = child.props.value === value
           return React.cloneElement(child, {
-            value: childValue,
-            onValueChange: (newValue: string) => onValueChange(newValue),
-            selected: isActive,
-            'aria-selected': isActive,
             role: 'tab',
+            'aria-selected': isActive,
             tabIndex: isActive ? 0 : -1,
             className: cn(
-              'flex h-10 w-24 items-center justify-center rounded-md border border-border text-sm font-medium transition-colors',
-              isActive && 'border-b-2 border-accent-violet text-accent-violet',
-              !isActive && 'text-muted hover:text-primary',
-              'cursor-pointer',
+              '-mb-px min-h-11 border-b-2 border-transparent px-4 text-sm font-medium text-[var(--muted)] transition-colors',
+              'hover:text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]',
+              isActive && 'border-[var(--gold)] text-[var(--gold-strong)]',
             ),
+            onClick: () => onValueChange(child.props.value),
           })
         })}
       </div>
-      {showIndicator && (
-        <div className="h-0.5 bg-accent-violet bottom-0 left-1/2 -translate-x-1/2 transition-all duration-300 ease-out [&_]:bg-accent-violet">
-          {/* Indicator width is set by active tab */}
-        </div>
-      )}
     </div>
   )
 })

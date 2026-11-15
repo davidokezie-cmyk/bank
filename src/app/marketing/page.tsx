@@ -53,11 +53,11 @@ const faqs = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[var(--ink)]">
-      <header className="sticky top-0 z-40 border-b border-[var(--border)]/70 bg-[var(--ink)]/85 backdrop-blur">
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-40 border-b border-[var(--glass-border)] bg-[var(--ink)]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--gold)] text-sm font-black text-[#0B0A14]">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--gold)] text-sm font-black text-[#131A2A]">
               B
             </span>
             Buy &amp; Build
@@ -71,7 +71,7 @@ export default function Home() {
             </Link>
             <Link
               href="/sign-up"
-              className="rounded-lg bg-[var(--accent-indigo)] px-4 py-2 font-semibold text-white transition-colors hover:bg-[#4F46E5]"
+              className="rounded-xl bg-[var(--gold)] px-4 py-2 font-semibold text-[#131A2A] transition-colors hover:bg-[var(--gold-hover)]"
             >
               Get started
             </Link>
@@ -81,12 +81,12 @@ export default function Home() {
 
       <MarketingMotion>
         <div>
-          <section className="relative overflow-hidden surface-glow">
+          <section className="relative overflow-hidden">
             <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 pt-14 sm:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:pb-24 lg:pt-20">
               <div>
                 <p
                   data-hero
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--gold)]"
+                  className="chip"
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--green-growth)]" />
                   Demo mode — no real money moves
@@ -96,7 +96,7 @@ export default function Home() {
                   className="mt-5 text-balance text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl"
                 >
                   Buy What You Love.
-                  <span className="mt-2 block bg-gradient-to-r from-[var(--gold)] via-[#ffd479] to-[var(--gold)] bg-clip-text text-transparent">
+                  <span className="mt-2 block text-[var(--gold)]">
                     Build Wealth As You Live.
                   </span>
                 </h1>
@@ -107,18 +107,18 @@ export default function Home() {
                 <div data-hero className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="/sign-up"
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--accent-indigo)] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#4F46E5]"
+                    className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--gold)] px-6 py-3 font-semibold text-[#131A2A] transition-colors hover:bg-[var(--gold-hover)]"
                   >
                     Start in demo mode
                   </Link>
                   <Link
                     href="/login"
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--border)] px-6 py-3 font-semibold text-[var(--text)] transition-colors hover:bg-[var(--surface)]"
+                    className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-6 py-3 font-semibold text-[var(--text)] transition-colors hover:bg-[var(--glass-highlight)]"
                   >
                     Explore the app
                   </Link>
                 </div>
-                <dl data-hero className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-[var(--border)] pt-6">
+                <dl data-hero className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-[var(--glass-border)] pt-6">
                   <div>
                     <dt className="text-xs uppercase tracking-wide text-[var(--muted)]">Salary split</dt>
                     <dd className="money mt-1 text-xl font-semibold">100%</dd>
@@ -135,7 +135,7 @@ export default function Home() {
               </div>
 
               <div data-hero className="relative mx-auto w-full max-w-md">
-                <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)]/80 p-6 shadow-2xl backdrop-blur">
+                <div className="glass p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-wide text-[var(--muted)]">Wealth overview</p>
@@ -150,7 +150,7 @@ export default function Home() {
                     {[
                       ['Rent goal', '40%', 'bg-[var(--gold)]'],
                       ['Emergency fund', '65%', 'bg-[var(--green-growth)]'],
-                      ['Holiday', '20%', 'bg-[var(--accent-violet)]'],
+                      ['Holiday', '20%', 'bg-[var(--steel)]'],
                     ].map(([label, value, color]) => (
                       <div key={label}>
                         <div className="flex justify-between text-xs text-[var(--muted)]">
@@ -168,10 +168,10 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="border-y border-[var(--border)] bg-[var(--surface)] py-16 sm:py-20">
+          <section className="border-y border-[var(--glass-border)] bg-[var(--surface)] py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
               <div data-reveal className="max-w-2xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold)]">How it works</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold-strong)]">How it works</p>
                 <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Three moves, one clear picture.</h2>
                 <p className="mt-3 text-[var(--muted)]">
                   Buying what you love and building wealth are not opposites. Buy &amp; Build makes the trade-offs
@@ -183,9 +183,9 @@ export default function Home() {
                 {steps.map((step) => (
                   <li
                     key={step.number}
-                    className="rounded-2xl border border-[var(--border)] bg-[var(--raised)] p-6 transition-transform duration-200 hover:-translate-y-1"
+                    className="glass-sm p-6 transition-transform duration-200 hover:-translate-y-1"
                   >
-                    <span className="money text-sm font-bold text-[var(--gold)]">{step.number}</span>
+                    <span className="money text-sm font-bold text-[var(--gold-strong)]">{step.number}</span>
                     <h3 className="mt-3 text-xl font-semibold">{step.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{step.body}</p>
                   </li>
@@ -202,7 +202,7 @@ export default function Home() {
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
               <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
                 <div data-reveal>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold)]">Joint Savings</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold-strong)]">Joint Savings</p>
                   <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Save together, stay in control.</h2>
                   <p className="mt-3 max-w-xl text-[var(--muted)]">
                     Two or more people save toward one shared goal — rent, a wedding, a trip, a family project, or an
@@ -215,7 +215,7 @@ export default function Home() {
                       ['72-hour votes', 'Withdrawal requests expire'],
                       ['Proportional refunds', 'Exact amount shown first'],
                     ].map(([term, detail]) => (
-                      <div key={term} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                      <div key={term} className="rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4">
                         <dt className="font-semibold">{term}</dt>
                         <dd className="mt-1 text-[var(--muted)]">{detail}</dd>
                       </div>
@@ -223,13 +223,13 @@ export default function Home() {
                   </dl>
                 </div>
 
-                <div data-reveal className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
+                <div data-reveal className="glass p-6 sm:p-8">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="text-xl font-semibold">Lagos Rent Fund</h3>
                       <p className="text-sm text-[var(--muted)]">Shared rent goal · Majority approves</p>
                     </div>
-                    <span className="rounded-full bg-[var(--raised)] px-3 py-1 text-xs">3/10 members</span>
+                    <span className="rounded-full border border-[var(--glass-border)] bg-[var(--glass-bg)] px-3 py-1 text-xs text-[var(--muted)]">3/10 members</span>
                   </div>
                   <p className="money mt-6 text-3xl font-semibold">₦75,000</p>
                   <p className="mt-1 text-xs text-[var(--muted)]">of ₦250,000 · 30% funded</p>
@@ -242,7 +242,7 @@ export default function Home() {
                       ['Aisha', 'Member', '₦25,000'],
                       ['Tunde', 'Member', '₦10,000'],
                     ].map(([name, role, amount]) => (
-                      <li key={name} className="flex items-center justify-between rounded-xl bg-[var(--raised)] px-4 py-3">
+                      <li key={name} className="flex items-center justify-between rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 py-3">
                         <span>
                           <span className="font-medium">{name}</span>
                           <span className="ml-2 text-xs text-[var(--muted)]">{role}</span>
@@ -259,11 +259,11 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="border-y border-[var(--border)] bg-[var(--surface)] py-16 sm:py-20">
+          <section className="border-y border-[var(--glass-border)] bg-[var(--surface)] py-16 sm:py-20">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
               <div data-reveal className="grid gap-8 lg:grid-cols-2">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold)]">Trust</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold-strong)]">Trust</p>
                   <h2 className="mt-3 text-3xl font-bold">Technology layer. Regulated partners.</h2>
                   <p className="mt-3 text-[var(--muted)]">
                     Buy &amp; Build is the experience layer. At a real launch, licensed banks, payment providers, and
@@ -272,7 +272,7 @@ export default function Home() {
                   </p>
                   <Link
                     href="/how-money-is-handled"
-                    className="mt-6 inline-flex min-h-11 items-center rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold transition-colors hover:bg-[var(--raised)]"
+                    className="mt-6 inline-flex min-h-11 items-center rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-5 py-3 text-sm font-semibold transition-colors hover:bg-[var(--glass-highlight)]"
                   >
                     How your money is handled
                   </Link>
@@ -284,7 +284,7 @@ export default function Home() {
                     ['No guaranteed returns', 'Investment value can go down. Capital is at risk.'],
                     ['Data minimisation', 'No BVN, NIN, card numbers, or passwords.'],
                   ].map(([title, detail]) => (
-                    <div key={title} className="rounded-2xl border border-[var(--border)] bg-[var(--raised)] p-5">
+                    <div key={title} className="glass-sm p-5">
                       <h3 className="font-semibold">{title}</h3>
                       <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{detail}</p>
                     </div>
@@ -298,12 +298,12 @@ export default function Home() {
             <div className="mx-auto max-w-4xl px-5 sm:px-8">
               <div data-reveal>
                 <h2 className="text-3xl font-bold sm:text-4xl">Frequently asked questions</h2>
-                <div className="mt-8 divide-y divide-[var(--border)] rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+                <div className="mt-8 divide-y divide-[var(--glass-border)] glass overflow-hidden">
                   {faqs.map((faq) => (
                     <details key={faq.question} className="group px-5 py-4">
                       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left font-medium marker:hidden">
                         {faq.question}
-                        <span className="grid h-6 w-6 flex-none place-items-center rounded-full border border-[var(--border)] text-[var(--muted)] transition-transform group-open:rotate-45">
+                        <span className="grid h-6 w-6 flex-none place-items-center rounded-full border border-[var(--glass-border)] text-[var(--muted)] transition-transform group-open:rotate-45">
                           +
                         </span>
                       </summary>
@@ -316,22 +316,22 @@ export default function Home() {
           </section>
 
           <section className="px-5 pb-20 sm:px-8">
-            <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl border border-[var(--border)] brand-gradient px-6 py-12 text-center sm:px-10 sm:py-16">
+            <div className="glass-lg mx-auto max-w-7xl overflow-hidden border-[var(--gold)]/20 px-6 py-12 text-center sm:px-10 sm:py-16">
               <h2 className="text-balance text-3xl font-bold sm:text-4xl">Ready to build your wealth?</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-white/85">
+              <p className="mx-auto mt-3 max-w-2xl text-[var(--muted)]">
                 Start with a salary split you can change any time. Everything here runs in demo mode — no real money
                 moves, and no sensitive details are collected.
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <Link
                   href="/sign-up"
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 py-3 font-semibold text-[#2b1a63] transition-transform hover:-translate-y-0.5"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--gold)] px-6 py-3 font-semibold text-[#131A2A] transition-transform hover:-translate-y-0.5"
                 >
                   Create a demo profile
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/40 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-6 py-3 font-semibold text-[var(--text)] transition-colors hover:bg-[var(--glass-highlight)]"
                 >
                   Log in
                 </Link>
@@ -341,7 +341,7 @@ export default function Home() {
         </div>
       </MarketingMotion>
 
-      <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
+      <footer className="border-t border-[var(--glass-border)] bg-[var(--ink)]">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p>Buy &amp; Build · Buy What You Love. Build Wealth As You Live.</p>
           <div className="flex flex-wrap gap-4">
@@ -351,7 +351,7 @@ export default function Home() {
             <Link href="/settings" className="hover:text-[var(--text)]">
               Privacy
             </Link>
-            <span className="text-[var(--gold)]">Demo mode</span>
+            <span className="text-[var(--gold-strong)]">Demo mode</span>
           </div>
         </div>
       </footer>

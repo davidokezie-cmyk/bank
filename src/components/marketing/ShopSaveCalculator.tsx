@@ -33,9 +33,9 @@ export function ShopSaveCalculator() {
     : 0
 
   return (
-    <div className="grid gap-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+    <div className="glass grid gap-6 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold)]">Try it</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold-strong)]">Try it</p>
         <h3 className="mt-2 text-2xl font-semibold">Your Shop &amp; Save preview</h3>
         <p className="mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
           A separate contribution is set aside when you opt in. It is not a discount and it never happens automatically.
@@ -46,7 +46,7 @@ export function ShopSaveCalculator() {
             Purchase amount (₦)
             <input
               id={purchaseId}
-              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--ink)] px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--accent-violet)] focus:ring-2 focus:ring-[var(--accent-violet)]/30"
+              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--ink)] px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)]/30"
               type="number"
               min="1"
               step="1"
@@ -59,7 +59,7 @@ export function ShopSaveCalculator() {
             Contribution rule (%)
             <input
               id={percentId}
-              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--ink)] px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--accent-violet)] focus:ring-2 focus:ring-[var(--accent-violet)]/30"
+              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--ink)] px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)]/30"
               type="number"
               min="1"
               max="100"
@@ -72,7 +72,7 @@ export function ShopSaveCalculator() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--raised)] p-6 text-center lg:min-w-64">
+      <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-6 text-center lg:min-w-64">
         <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">Set aside separately</p>
         <p aria-live="polite" className="money mt-2 text-4xl font-semibold text-[var(--green-growth)]">
           {valid ? formatKobo(contributionKobo) : '—'}
@@ -82,7 +82,7 @@ export function ShopSaveCalculator() {
             ? `${formatKobo(nairaToKobo(purchaseNaira))} purchase · ${percentValue}% rule`
             : 'Enter a purchase and a percentage above 0.'}
         </p>
-        <p className="mt-4 rounded-lg bg-[var(--ink)] px-3 py-2 text-[11px] font-medium text-[var(--gold)]">
+        <p className="chip mt-4">
           Demo mode — no real money moves
         </p>
       </div>

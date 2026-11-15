@@ -2,70 +2,57 @@ import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
- * Progress component with states:
- * determinate, indeterminate, with label
- * Uses CSS variables for colors
- * Accessible: aria-valuetext, role progressbar
+ * Determinate progress bar.
+ * Accessible: role="progressbar" with aria-valuenow/min/max.
+ * Respects reduced motion (transition is disabled globally under prefers-reduced-motion).
  */
 export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Progress value 0-1 */
   value: number
-  /** Show label inside bar */
-  showLabel?: boolean
-  /** Label text */
+  /** Visible label rendered above the bar */
   label?: string
-  /** Bar color (CSS variable name without 'var()') */
-  color?: 'gold' | 'green-growth' | 'accent-violet' | 'alert-coral'
-  /** Show progress as percentage */
+  /** Bar colour token */
+  color?: 'gold' | 'green-growth' | 'steel' | 'alert-coral'
+  /** Show the percentage as text to the right of the label */
   showPercentage?: boolean
   /** Height of bar */
   height?: '2' | '4' | '8'
 }
 
 export const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) => {
-  const { value, showLabel = false, label, color = 'gold', showPercentage = true, height = '4', className, ...rest } = props
+  const { value, label, color = 'gold', showPercentage = true, height = '4', className, ...rest } = props
 
-  const percentage = Math.max(0, Math.min(100, value * 100))
+  const clamped = Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0))
+  const percentage = Math.round(clamped * 100)
   const barHeight = height === '2' ? 'h-2' : height === '8' ? 'h-8' : 'h-4'
 
-  const colorClasses = {
+  const fillClasses = {
     gold: 'bg-gold',
     'green-growth': 'bg-green-growth',
-    'accent-violet': 'bg-accent-violet',
+    steel: 'bg-steel',
     'alert-coral': 'bg-alert-coral',
-  }
-
-  const labelClasses = cn(
-    'absolute left-2 top-1/2 -translate-y-1/2 text-xs font-medium',
-    'select-none',
-  )
+  }[color]
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        'relative w-full rounded-md overflow-hidden',
-        barHeight,
-        className,
+    <div ref={ref} className={cn('w-full', className)} {...rest}>
+      {(label || showPercentage) && (
+        <div className="mb-1 flex items-baseline justify-between gap-3 text-xs">
+          {label && <span className="text-muted">{label}</span>}
+          {showPercentage && <span className="money text-muted">{percentage}%</span>}
+        </div>
       )}
-      {...rest}
-    >
       <div
-        className={cn(
-          'absolute inset-0',
-          colorClasses[color as keyof typeof colorClasses] || colorClasses.gold,
-        )}
-      />
-      <div
-        className={cn(
-          'relative flex flex-col items-center py-1',
-          showLabel && labelClasses,
-        )}
+        role="progressbar"
+        aria-label={label ?? 'Progress'}
+        aria-valuenow={percentage}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        className={cn('relative w-full overflow-hidden rounded-full bg-raised', barHeight)}
       >
-        {showLabel && <span className="labelClasses">{label}</span>}
-        {showPercentage && (
-          <span className="absolute right-2 text-xs text-muted">{Math.round(percentage)}%</span>
-        )}
+        <div
+          className={cn('h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none', fillClasses)}
+          style={{ width: `${percentage}%` }}
+        />
       </div>
     </div>
   )

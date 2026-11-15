@@ -33,10 +33,10 @@ type ActivityItem = {
   createdAt: string
 }
 
-const fieldClass = 'mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--ink)] px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--accent-violet)] focus:ring-2 focus:ring-[var(--accent-violet)]/30'
+const fieldClass = 'mt-1 w-full rounded-xl border border-[var(--glass-border)] bg-[var(--ink)] px-4 py-3 text-[var(--text)] outline-none transition focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)]/30'
 const labelClass = 'block text-sm font-medium text-[var(--text)]'
-const buttonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-[var(--accent-indigo)] px-5 py-3 font-semibold text-white transition hover:bg-[#4F46E5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] disabled:cursor-not-allowed disabled:opacity-50'
-const panelClass = 'rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-lg'
+const buttonClass = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-[var(--gold)] px-5 py-3 font-semibold text-[#131A2A] transition-colors hover:bg-[var(--gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50'
+const panelClass = 'glass p-5'
 
 function PageFrame({
   title,
@@ -50,11 +50,11 @@ function PageFrame({
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
       <header className="mb-6">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold)]">Buy & Build</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold-strong)]">Buy & Build</p>
         <h1 className="text-3xl font-semibold tracking-tight text-[var(--text)] sm:text-4xl">{title}</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">{description}</p>
       </header>
-      <p className="mb-5 inline-flex rounded-full border border-[var(--border)] bg-[var(--raised)] px-3 py-1.5 text-xs font-medium text-[var(--gold)]">
+      <p className="mb-5 inline-flex rounded-full border border-[var(--glass-border)] bg-[var(--glass-bg)] px-3 py-1.5 text-xs font-medium text-[var(--gold-strong)]">
         Demo mode — no real money moves
       </p>
       {children}
@@ -132,7 +132,7 @@ function GoalsPage() {
             <span className="text-sm text-[var(--muted)]">{goals.length} total</span>
           </div>
           {goals.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[var(--border)] p-7 text-center">
+            <div className="rounded-xl border border-dashed border-[var(--glass-border)] p-7 text-center">
               <p className="font-medium">Your next milestone starts here.</p>
               <p className="mt-2 text-sm text-[var(--muted)]">Create a goal for rent, a car, education, a business, or a holiday.</p>
             </div>
@@ -141,7 +141,7 @@ function GoalsPage() {
               {goals.map((goal) => {
                 const progress = Math.min(100, Math.round(goal.currentKobo / goal.targetKobo * 100))
                 return (
-                  <li key={goal.id} className="rounded-xl border border-[var(--border)] bg-[var(--raised)] p-4">
+                  <li key={goal.id} className="rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div><h3 className="font-semibold">{goal.name}</h3><p className="text-xs capitalize text-[var(--muted)]">{goal.category}{goal.deadline ? ` · Due ${goal.deadline}` : ''}</p></div>
                       <p className="font-semibold tabular-nums">{formatKobo(goal.currentKobo)} <span className="text-xs font-normal text-[var(--muted)]">of {formatKobo(goal.targetKobo)}</span></p>
@@ -155,7 +155,7 @@ function GoalsPage() {
                         <button
                           type="button"
                           onClick={() => contributeToGoal(goal.id, 5000)}
-                          className="min-h-9 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
+                          className="min-h-9 rounded-lg border border-[var(--glass-border)] px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--glass-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
                         >
                           Add ₦5,000
                         </button>
@@ -276,8 +276,8 @@ function SavePage({ onboarding = false }: { onboarding?: boolean }) {
             <label className={labelClass}>Rule type<select className={fieldClass} value={ruleType} onChange={(event) => setRuleType(event.target.value as ShopSaveRuleType)}><option value="percentage">Percentage</option><option value="fixed">Fixed amount</option><option value="round_up">Round up to nearest ₦100</option></select></label>
             {ruleType !== 'round_up' && <label className={labelClass}>{ruleType === 'fixed' ? 'Contribution amount (₦)' : 'Purchase percentage (%)'}<input className={fieldClass} type="number" min="0.01" step="0.01" value={ruleValue} onChange={(event) => setRuleValue(event.target.value)} /></label>}
             <label className={labelClass}>Example purchase (₦)<input className={fieldClass} type="number" min="1" value={purchase} onChange={(event) => setPurchase(event.target.value)} /></label>
-            <label className="flex items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--raised)] p-4 text-sm">
-              <input className="mt-1 h-4 w-4 accent-[var(--accent-violet)]" type="checkbox" checked={optIn} onChange={(event) => setOptIn(event.target.checked)} />
+            <label className="flex items-start gap-3 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 text-sm">
+              <input className="mt-1 h-4 w-4 accent-[var(--gold)]" type="checkbox" checked={optIn} onChange={(event) => setOptIn(event.target.checked)} />
               <span><strong>I opt in to this rule.</strong><span className="mt-1 block text-[var(--muted)]">I can pause, change, or turn it off at any time. Each contribution will be itemised.</span></span>
             </label>
             <button type="submit" className={buttonClass} disabled={!optIn}>Preview contribution</button>
@@ -289,8 +289,8 @@ function SavePage({ onboarding = false }: { onboarding?: boolean }) {
           <p className="mt-1 text-sm text-[var(--muted)]">Partner-powered demo options. Investment values are separate from your savings balance.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {[['Treasury bills','Lower risk'],['Fixed-income fund','Medium risk'],['Agriculture fund','Higher risk']].map(([name, risk]) => (
-              <article key={name} className="rounded-xl border border-[var(--border)] bg-[var(--raised)] p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--gold)]">Partner-powered · Demo</p>
+              <article key={name} className="rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--gold-strong)]">Partner-powered · Demo</p>
                 <h3 className="mt-2 font-semibold">{name}</h3>
                 <p className="mt-1 text-sm text-[var(--muted)]">{risk}</p>
                 <p className="mt-3 text-xs leading-5 text-[var(--muted)]">Investment value can go up or down. Capital is at risk; returns are not guaranteed. Fees and withdrawal conditions would be shown before investing.</p>
@@ -305,7 +305,7 @@ function SavePage({ onboarding = false }: { onboarding?: boolean }) {
 }
 
 function Allocation({ label, value }: { label: string; value: number }) {
-  return <div className="rounded-xl bg-[var(--raised)] p-3"><p className="text-xs text-[var(--muted)]">{label}</p><p className="mt-1 font-semibold tabular-nums">{formatKobo(value)}</p></div>
+  return <div className="rounded-xl bg-[var(--glass-bg)] p-3"><p className="text-xs text-[var(--muted)]">{label}</p><p className="mt-1 font-semibold tabular-nums">{formatKobo(value)}</p></div>
 }
 
 function SendPage() {
@@ -357,13 +357,13 @@ function SendPage() {
         ) : (
           <div>
             <h2 className="text-lg font-semibold">Review before confirming</h2>
-            <dl className="my-5 space-y-3 rounded-xl bg-[var(--raised)] p-4 text-sm">
+            <dl className="my-5 space-y-3 rounded-xl bg-[var(--glass-bg)] p-4 text-sm">
               <div className="flex justify-between gap-3"><dt className="text-[var(--muted)]">Recipient</dt><dd className="break-all text-right">{recipient}</dd></div>
               <div className="flex justify-between gap-3"><dt className="text-[var(--muted)]">Amount</dt><dd className="font-semibold tabular-nums">{formatKobo(nairaToKobo(Number(amount)))}</dd></div>
               {note && <div><dt className="text-[var(--muted)]">Note</dt><dd>{note}</dd></div>}
             </dl>
-            <p className="mb-5 text-xs text-[var(--gold)]">Demo mode — no real money moves.</p>
-            <div className="flex flex-wrap gap-3"><button className={buttonClass} type="button" onClick={confirmTransfer}>Confirm demo transfer</button><button className="min-h-11 rounded-xl border border-[var(--border)] px-5 py-3" type="button" onClick={() => setReview(false)}>Edit details</button></div>
+            <p className="mb-5 text-xs text-[var(--gold-strong)]">Demo mode — no real money moves.</p>
+            <div className="flex flex-wrap gap-3"><button className={buttonClass} type="button" onClick={confirmTransfer}>Confirm demo transfer</button><button className="min-h-11 rounded-xl border border-[var(--glass-border)] px-5 py-3" type="button" onClick={() => setReview(false)}>Edit details</button></div>
           </div>
         )}
       </section>
@@ -496,7 +496,7 @@ function JointPage({
               />
             </label>
           )}
-          <p className="rounded-xl bg-[var(--raised)] p-4 text-sm leading-6 text-[var(--muted)]">Joint pots are savings only. Members can leave for a proportional refund; the owner starts closure and all members confirm. Fees and withdrawal conditions are shown before actions. A real launch requires a regulated partner to hold pooled funds and verify each member.</p>
+          <p className="rounded-xl bg-[var(--glass-bg)] p-4 text-sm leading-6 text-[var(--muted)]">Joint pots are savings only. Members can leave for a proportional refund; the owner starts closure and all members confirm. Fees and withdrawal conditions are shown before actions. A real launch requires a regulated partner to hold pooled funds and verify each member.</p>
           <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>I understand this demo pot’s approval rule, proportional leave/close refund terms, fees, and demo-only status.</span></label>
           <button className={buttonClass} type="submit">Create demo pot</button>
           <FormNotice error={error} success="" />
@@ -511,14 +511,16 @@ function JointPage({
         {pot ? (
           <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
             <section className={`${panelClass} space-y-5`}>
-              <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-sm text-[var(--muted)]">Pot balance · savings only</p><p className="mt-1 text-3xl font-semibold tabular-nums">{formatKobo(pot.balanceKobo)}</p></div><p className="rounded-full bg-[var(--raised)] px-3 py-2 text-sm">{pot.rule}</p></div>
-              <div><div className="mb-2 flex justify-between text-sm"><span>Progress</span><span>{Math.min(100, Math.round(pot.balanceKobo / pot.targetKobo * 100))}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[var(--ink)]"><div className="h-full bg-[var(--gold)]" style={{ width: `${Math.min(100, pot.balanceKobo / pot.targetKobo * 100)}%` }} /></div><p className="mt-2 text-xs text-[var(--muted)]">Target {formatKobo(pot.targetKobo)}{pot.deadline ? ` · Deadline ${pot.deadline}` : ' · No deadline'}</p></div>
+              <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-sm text-[var(--muted)]">Pot balance · savings only</p><p className="mt-1 text-3xl font-semibold tabular-nums">{formatKobo(pot.balanceKobo)}</p></div><p className="rounded-full bg-[var(--glass-bg)] px-3 py-2 text-sm">{pot.rule}</p></div>
+              <div>
+                <div className="mb-2 flex justify-between text-sm"><span>Progress</span><span>{Math.min(100, Math.round(pot.balanceKobo / pot.targetKobo * 100))}%</span></div>
+                <div className="h-2 overflow-hidden rounded-full bg-[var(--ink)]" role="progressbar" aria-label={`${pot.name} progress`} aria-valuenow={Math.min(100, Math.round(pot.balanceKobo / pot.targetKobo * 100))} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-[var(--gold)]" style={{ width: `${Math.min(100, pot.balanceKobo / pot.targetKobo * 100)}%` }} /></div><p className="mt-2 text-xs text-[var(--muted)]">Target {formatKobo(pot.targetKobo)}{pot.deadline ? ` · Deadline ${pot.deadline}` : ' · No deadline'}</p></div>
               <div>
                 <h2 className="text-lg font-semibold">Members and roles</h2>
-                <ul className="mt-3 flex flex-wrap gap-2">{pot.members.map((member, index) => <li key={member} className="rounded-full border border-[var(--border)] px-3 py-2 text-sm">{member} · {index === 0 ? 'Owner' : 'Member'}</li>)}</ul>
+                <ul className="mt-3 flex flex-wrap gap-2">{pot.members.map((member, index) => <li key={member} className="rounded-full border border-[var(--glass-border)] px-3 py-2 text-sm">{member} · {index === 0 ? 'Owner' : 'Member'}</li>)}</ul>
                 <p className="mt-2 text-xs text-[var(--muted)]">{pot.members.length}/10 members · savings only</p>
               </div>
-              <form onSubmit={sendInvite} className="rounded-xl border border-[var(--border)] p-4">
+              <form onSubmit={sendInvite} className="rounded-xl border border-[var(--glass-border)] p-4">
                 <h3 className="font-medium">Invite someone</h3>
                 <p className="mt-1 text-sm text-[var(--muted)]">Existing demo users only. They must accept before joining.</p>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -532,19 +534,19 @@ function JointPage({
                       autoComplete="off"
                     />
                   </label>
-                  <button type="submit" className="min-h-11 rounded-xl bg-[var(--accent-indigo)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#4F46E5]">
+                  <button type="submit" className="min-h-11 rounded-xl bg-[var(--gold)] px-4 py-2.5 text-sm font-semibold text-[#131A2A] transition-colors hover:bg-[var(--gold-hover)]">
                     Send invite
                   </button>
                 </div>
               </form>
-              <div className="rounded-xl border border-[var(--border)] p-4"><h3 className="font-medium">Pot activity</h3><p className="mt-2 text-sm text-[var(--muted)]">Contributions and withdrawal votes are visible to members of this pot only. Other members’ balances, goals, and non-pot transactions stay private.</p></div>
+              <div className="rounded-xl border border-[var(--glass-border)] p-4"><h3 className="font-medium">Pot activity</h3><p className="mt-2 text-sm text-[var(--muted)]">Contributions and withdrawal votes are visible to members of this pot only. Other members’ balances, goals, and non-pot transactions stay private.</p></div>
               <FormNotice error="" success={message} />
             </section>
             <aside className={`${panelClass} h-fit space-y-4`}>
               <h2 className="text-lg font-semibold">Your contribution</h2>
               <p className="text-sm text-[var(--muted)]">Nobody is required to contribute. Each contribution comes from your own opted-in demo account.</p>
               <button className={buttonClass} type="button" onClick={contribute}>Add ₦2,000 demo contribution</button>
-              <Link className="block rounded-xl border border-[var(--border)] px-4 py-3 text-sm" href="/withdraw">Propose a withdrawal</Link>
+              <Link className="block rounded-xl border border-[var(--glass-border)] px-4 py-3 text-sm" href="/withdraw">Propose a withdrawal</Link>
               <p className="text-xs text-[var(--muted)]">Demo fee: ₦0. Withdrawal requests expire after 72 hours and cannot exceed the pot balance.</p>
             </aside>
           </div>
@@ -558,10 +560,10 @@ function JointPage({
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-[var(--muted)]">Roles, contributions, and activity are shared only within each pot.</p><Link className={buttonClass} href="/joint/new">Create a pot</Link></div>
       <ul className="grid gap-4 lg:grid-cols-2">{pots.map((item) => (
         <li key={item.id} className={panelClass}>
-          <Link href={`/joint/${item.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]">
-            <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold">{item.name}</h2><p className="text-sm text-[var(--muted)]">{item.goal}</p></div><span className="rounded-full bg-[var(--raised)] px-3 py-1 text-xs">{item.members.length}/10 members</span></div>
+          <Link href={`/joint/${item.id}`} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]">
+            <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold">{item.name}</h2><p className="text-sm text-[var(--muted)]">{item.goal}</p></div><span className="rounded-full bg-[var(--glass-bg)] px-3 py-1 text-xs">{item.members.length}/10 members</span></div>
             <p className="mt-5 text-2xl font-semibold tabular-nums">{formatKobo(item.balanceKobo)}</p><p className="mt-1 text-xs text-[var(--muted)]">of {formatKobo(item.targetKobo)} · {item.rule}</p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--ink)]"><div className="h-full bg-[var(--gold)]" style={{ width: `${Math.min(100, item.balanceKobo / item.targetKobo * 100)}%` }} /></div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--ink)]" role="progressbar" aria-label={`${item.name} progress`} aria-valuenow={Math.min(100, Math.round(item.balanceKobo / item.targetKobo * 100))} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-[var(--gold)]" style={{ width: `${Math.min(100, item.balanceKobo / item.targetKobo * 100)}%` }} /></div>
           </Link>
         </li>
       ))}</ul>
@@ -595,7 +597,7 @@ function InvitesPage() {
         <div className={`${panelClass} max-w-2xl`}>
           <h2 className="font-semibold">No pending invitations</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">When someone invites you to a joint pot, it will appear here.</p>
-          <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-semibold" href="/joint">
+          <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-[var(--glass-border)] px-4 py-2.5 text-sm font-semibold" href="/joint">
             Go to Joint Savings
           </Link>
         </div>
@@ -603,12 +605,12 @@ function InvitesPage() {
         <ul className="space-y-5">
           {pending.map((invite) => (
             <li key={invite.id} className={`${panelClass} max-w-2xl`}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--gold)]">
-                Invited by {invite.invitedBy} · expires {new Date(invite.expiresAt).toLocaleDateString('en-NG')}
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--gold-strong)]">
+                Invited by {invite.invitedBy} · expires {invite.expiresAt.slice(0, 10)}
               </p>
               <h2 className="mt-2 text-xl font-semibold">{invite.potName}</h2>
               <p className="mt-1 text-sm text-[var(--muted)]">Savings only · Member role · Demo pot</p>
-              <div className="my-5 space-y-2 rounded-xl bg-[var(--raised)] p-4 text-sm leading-6">
+              <div className="my-5 space-y-2 rounded-xl bg-[var(--glass-bg)] p-4 text-sm leading-6">
                 <p>Your contributions are voluntary and itemised. Nobody can debit your account for you.</p>
                 <p>If you leave, your refund is proportional to your net contributions and the pot balance.</p>
                 <p>Owner starts closure; every member confirms. Demo withdrawal fee: ₦0.</p>
@@ -617,7 +619,7 @@ function InvitesPage() {
               <label className="mb-5 flex items-start gap-3 text-sm">
                 <input
                   type="checkbox"
-                  className="mt-1 h-4 w-4 accent-[var(--accent-violet)]"
+                  className="mt-1 h-4 w-4 accent-[var(--gold)]"
                   checked={Boolean(termsAccepted[invite.id])}
                   onChange={(event) =>
                     setTermsAccepted((current) => ({ ...current, [invite.id]: event.target.checked }))
@@ -636,7 +638,7 @@ function InvitesPage() {
                 </button>
                 <button
                   type="button"
-                  className="min-h-11 rounded-xl border border-[var(--border)] px-5 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
+                  className="min-h-11 rounded-xl border border-[var(--glass-border)] px-5 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
                   onClick={() => respond(invite.id, 'declined')}
                 >
                   Decline
@@ -651,7 +653,7 @@ function InvitesPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">Past invitations</h2>
           <ul className="mt-3 space-y-2">
             {resolved.map((invite) => (
-              <li key={invite.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
+              <li key={invite.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] px-4 py-3 text-sm">
                 <span>{invite.potName}</span>
                 <span className="capitalize text-[var(--muted)]">{invite.status}</span>
               </li>
@@ -699,7 +701,7 @@ function WithdrawPage() {
         <div className={`${panelClass} max-w-2xl`}>
           <h2 className="font-semibold">No pots available</h2>
           <p className="mt-2 text-sm text-[var(--muted)]">Create a joint pot or accept an invitation first.</p>
-          <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-semibold" href="/joint">
+          <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-[var(--glass-border)] px-4 py-2.5 text-sm font-semibold" href="/joint">
             Go to Joint Savings
           </Link>
         </div>
@@ -720,7 +722,7 @@ function WithdrawPage() {
             ))}
           </select>
         </label>
-        <p className="rounded-xl bg-[var(--raised)] p-4 text-sm">
+        <p className="rounded-xl bg-[var(--glass-bg)] p-4 text-sm">
           {pot.name} · Available demo balance: <strong className="money">{formatKobo(pot.balanceKobo)}</strong> · Rule: {pot.rule} · Demo fee: ₦0
         </p>
         <label className={labelClass}>Amount (₦)<input className={fieldClass} type="number" min="1" max={availableNaira} step="0.01" inputMode="decimal" value={amount} onChange={(event) => setAmount(event.target.value)} required /></label>
@@ -740,7 +742,7 @@ function ActivityPage() {
     <PageFrame title="Activity" description="A private, itemised record of your demo actions and contributions. Joint pot activity is visible only to pot members.">
       {storageError && <p role="alert" className="mb-4 text-sm text-[var(--alert-coral)]">{storageError}</p>}
       {activity.length === 0 ? <div className={panelClass}><h2 className="font-semibold">No personal activity yet</h2><p className="mt-2 text-sm text-[var(--muted)]">Your confirmed demo actions will be listed here.</p></div> : (
-        <ul className={`${panelClass} divide-y divide-[var(--border)]`}>{activity.map((item) => <li key={item.id} className="flex flex-wrap justify-between gap-3 py-4 first:pt-0 last:pb-0"><div><h2 className="font-medium">{item.title}</h2><p className="text-sm text-[var(--muted)]">{item.description}</p><time className="text-xs text-[var(--muted)]">{new Date(item.createdAt).toLocaleString('en-NG')}</time></div>{item.amountKobo !== undefined && <p className="font-semibold tabular-nums">{formatKobo(item.amountKobo)}</p>}</li>)}</ul>
+        <ul className={`${panelClass} divide-y divide-[var(--border)]`}>{activity.map((item) => <li key={item.id} className="flex flex-wrap justify-between gap-3 py-4 first:pt-0 last:pb-0"><div><h2 className="font-medium">{item.title}</h2><p className="text-sm text-[var(--muted)]">{item.description}</p><time className="text-xs text-[var(--muted)]" dateTime={item.createdAt}>{item.createdAt.slice(0, 10)}</time></div>{item.amountKobo !== undefined && <p className="font-semibold tabular-nums">{formatKobo(item.amountKobo)}</p>}</li>)}</ul>
       )}
     </PageFrame>
   )
@@ -748,9 +750,9 @@ function ActivityPage() {
 
 function InfoPage({ screen }: { screen: FeatureScreen }) {
   if (screen === 'cards') return <PageFrame title="Cards" description="Manage demo card controls. No real card details are collected or stored."><CardsPanel /></PageFrame>
-  if (screen === 'coach') return <PageFrame title="Money coach" description="Practical, non-judgmental prompts to help you stay intentional with your money."><section className={`${panelClass} space-y-4`}>{[['Start with your priorities','Choose a salary split that reflects what matters to you. You can update it when your circumstances change.'],['Keep savings and investments separate','Review each balance on its own. Investment values may rise or fall; returns are never guaranteed.'],['Shop & Save stays optional','Purchase-linked contributions only happen after explicit opt-in, and you can pause the rule at any time.']].map(([title,body]) => <article key={title} className="rounded-xl bg-[var(--raised)] p-4"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{body}</p></article>)}</section></PageFrame>
+  if (screen === 'coach') return <PageFrame title="Money coach" description="Practical, non-judgmental prompts to help you stay intentional with your money."><section className={`${panelClass} space-y-4`}>{[['Start with your priorities','Choose a salary split that reflects what matters to you. You can update it when your circumstances change.'],['Keep savings and investments separate','Review each balance on its own. Investment values may rise or fall; returns are never guaranteed.'],['Shop & Save stays optional','Purchase-linked contributions only happen after explicit opt-in, and you can pause the rule at any time.']].map(([title,body]) => <article key={title} className="rounded-xl bg-[var(--glass-bg)] p-4"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{body}</p></article>)}</section></PageFrame>
   if (screen === 'profile') return <ProfilePage />
-  if (screen === 'settings') return <PageFrame title="Settings & privacy" description="Control your preferences and understand what a real launch would require."><section className={`${panelClass} space-y-4`}><p>Demo mode is active. No bank, payment, or investment provider is connected.</p><ThemePreference /><Link className="block rounded-xl border border-[var(--border)] p-4 underline" href="/how-money-is-handled">How your money is handled</Link><p className="text-sm leading-6 text-[var(--muted)]">We minimise data, ask for consent before optional contributions, and avoid storing BVN, NIN, card numbers, or passwords. A production launch needs a documented retention and deletion process and legal review under Nigerian data-protection and financial regulations.</p><p className="text-sm text-[var(--muted)]">No sensitive identity or card information is requested in this demo.</p></section></PageFrame>
+  if (screen === 'settings') return <PageFrame title="Settings & privacy" description="Control your preferences and understand what a real launch would require."><section className={`${panelClass} space-y-4`}><p>Demo mode is active. No bank, payment, or investment provider is connected.</p><ThemePreference /><Link className="block rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 font-medium no-underline transition-colors hover:bg-[var(--glass-highlight)]" href="/how-money-is-handled">How your money is handled</Link><p className="text-sm leading-6 text-[var(--muted)]">We minimise data, ask for consent before optional contributions, and avoid storing BVN, NIN, card numbers, or passwords. A production launch needs a documented retention and deletion process and legal review under Nigerian data-protection and financial regulations.</p><p className="text-sm text-[var(--muted)]">No sensitive identity or card information is requested in this demo.</p></section></PageFrame>
   return <PageFrame title="How your money is handled" description="Buy & Build is a technology and customer-experience layer. Regulated partners provide any real financial services."><section className={`${panelClass} max-w-3xl space-y-4 text-sm leading-6`}><p><strong>Demo mode — no real money moves.</strong> Balances, contributions, transfers, and investments in this prototype are examples only.</p><p>At a real launch, banks, payment providers, and licensed investment operators would provide the regulated financial services. Buy & Build would not use customer funds as working capital.</p><p>Savings and investments are separate. Investment value may go up or down; there are no guaranteed returns. Partner fees, risks, and withdrawal conditions must be shown before a real transaction.</p><p>Joint pots are savings-only. A real launch would need a regulated partner to hold pooled funds and verify every member. This prototype does not imply insurance or returns.</p><p>We do not collect real BVN, NIN, card numbers, or passwords here. A real launch requires data minimisation, clear consent, retention/deletion controls, and legal review under Nigerian data-protection and financial regulations.</p></section></PageFrame>
 }
 
@@ -758,11 +760,11 @@ function ThemePreference() {
   const theme = useTheme()
 
   return (
-    <fieldset className="rounded-xl border border-[var(--border)] p-4">
+    <fieldset className="rounded-xl border border-[var(--glass-border)] p-4">
       <legend className="px-1 text-sm font-medium">Appearance</legend>
       <div className="mt-2 flex gap-2">
         {(['dark', 'light'] as const).map((option) => (
-          <button key={option} type="button" aria-pressed={theme === option} onClick={() => persistTheme(option)} className={`min-h-11 rounded-lg border px-4 py-2 text-sm capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] ${theme === option ? 'border-[var(--accent-violet)] bg-[var(--raised)]' : 'border-[var(--border)]'}`}>{option}</button>
+          <button key={option} type="button" aria-pressed={theme === option} onClick={() => persistTheme(option)} className={`min-h-11 rounded-lg border px-4 py-2 text-sm capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] ${theme === option ? 'border-[var(--gold)]/60 bg-[var(--glass-bg)]' : 'border-[var(--glass-border)]'}`}>{option}</button>
         ))}
       </div>
     </fieldset>
@@ -771,7 +773,7 @@ function ThemePreference() {
 
 function CardsPanel() {
   const [locked, setLocked] = useState(false)
-  return <section className={`${panelClass} max-w-xl`}><p className="text-xs font-semibold uppercase tracking-wide text-[var(--gold)]">Demo card</p><p className="mt-4 text-2xl font-semibold">{locked ? 'Card paused' : 'Virtual card preview'}</p><p className="mt-2 text-sm text-[var(--muted)]">No card number, CVV, or payment credentials are stored in this prototype.</p><button className="mt-5 min-h-11 rounded-xl border border-[var(--border)] px-4 py-2" onClick={() => setLocked((value) => !value)} type="button">{locked ? 'Resume demo card' : 'Pause demo card'}</button></section>
+  return <section className={`${panelClass} max-w-xl`}><p className="text-xs font-semibold uppercase tracking-wide text-[var(--gold-strong)]">Demo card</p><p className="mt-4 text-2xl font-semibold">{locked ? 'Card paused' : 'Virtual card preview'}</p><p className="mt-2 text-sm text-[var(--muted)]">No card number, CVV, or payment credentials are stored in this prototype.</p><button className="mt-5 min-h-11 rounded-xl border border-[var(--glass-border)] px-4 py-2" onClick={() => setLocked((value) => !value)} type="button">{locked ? 'Resume demo card' : 'Pause demo card'}</button></section>
 }
 
 function ProfilePage() {

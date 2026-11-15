@@ -3,43 +3,53 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant light (&:where(.light, .light *));
 
-/* Design tokens — dark is the primary experience. */
+/* Design tokens — refined glass on deep navy. Dark is the primary experience. */
 :root,
 html.dark {
-  --ink: #0b0a14;
-  --surface: #14122a;
-  --raised: #1c1938;
-  --border: #2a2740;
-  --text: #f4f3ff;
-  --muted: #a5a3c4;
-  --accent-violet: #8b5cf6;
-  --accent-indigo: #6366f1;
-  --gold: #f5b83d;
-  --gold-strong: #fbbf24;
-  --green-growth: #2bd67b;
-  --alert-coral: #ff6b6b;
-  --ring: #f5b83d;
-  --gradient-brand: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-  --shadow-raised: 0 20px 45px -25px rgba(5, 3, 20, 0.9);
+  --ink: #0a0e1a;
+  --surface: #101623;
+  --raised: #182031;
+  --border: #24304a;
+  --text: #e8ecf3;
+  --muted: #8a94a8;
+  --gold: #e3b452;
+  --gold-hover: #edc569;
+  --gold-strong: #f2c06b;
+  --steel: #5b6b8c;
+  --green-growth: #33d17a;
+  --alert-coral: #e0605f;
+  --ring: #e3b452;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(232, 236, 243, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+  --shadow-glass-sm: 0 4px 16px -8px rgba(0, 0, 0, 0.5);
+  --shadow-glass: 0 16px 48px -16px rgba(0, 0, 0, 0.6), inset 0 1px 0 var(--glass-highlight);
+  --shadow-glass-lg: 0 28px 80px -24px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --aurora: radial-gradient(1100px 560px at 78% -8%, #131f33 0%, transparent 60%);
   color-scheme: dark;
 }
 
 html.light {
-  --ink: #f7f5fb;
+  --ink: #f5f6fa;
   --surface: #ffffff;
-  --raised: #f0eef8;
-  --border: #d9d5e8;
-  --text: #17132b;
-  --muted: #5f5b7a;
-  --accent-violet: #6d28d9;
-  --accent-indigo: #4f46e5;
-  --gold: #8a5a00;
-  --gold-strong: #b77900;
+  --raised: #eceef4;
+  --border: #d5d9e4;
+  --text: #131a2a;
+  --muted: #55607a;
+  --gold: #e3b452;
+  --gold-hover: #d9a83f;
+  --gold-strong: #8a5a00;
+  --steel: #55607a;
   --green-growth: #137a45;
   --alert-coral: #b42318;
-  --ring: #6d28d9;
-  --gradient-brand: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-  --shadow-raised: 0 20px 45px -30px rgba(29, 22, 64, 0.35);
+  --ring: #8a5a00;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(19, 26, 42, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --shadow-glass-sm: 0 4px 16px -8px rgba(19, 26, 42, 0.18);
+  --shadow-glass: 0 16px 40px -20px rgba(19, 26, 42, 0.35), inset 0 1px 0 var(--glass-highlight);
+  --shadow-glass-lg: 0 28px 72px -28px rgba(19, 26, 42, 0.4), inset 0 1px 0 var(--glass-highlight);
+  --aurora: radial-gradient(1100px 560px at 78% -8%, #e4e7f0 0%, transparent 60%);
   color-scheme: light;
 }
 
@@ -52,10 +62,10 @@ html.light {
   --color-primary: var(--text);
   --color-title: var(--text);
   --color-muted: var(--muted);
-  --color-accent-violet: var(--accent-violet);
-  --color-accent-indigo: var(--accent-indigo);
   --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
   --color-gold-strong: var(--gold-strong);
+  --color-steel: var(--steel);
   --color-green-growth: var(--green-growth);
   --color-alert-coral: var(--alert-coral);
   --color-ring: var(--ring);
@@ -67,7 +77,7 @@ html.light {
 
   --radius-xl: 0.9rem;
   --radius-2xl: 1.25rem;
-  --radius-3xl: 1.75rem;
+  --radius-3xl: 1.5rem;
 
   --animate-fade-in: fade-in 0.4s ease-out both;
   --animate-rise: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -91,6 +101,20 @@ html.light {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Scroll-reveal: sections are visible by default; JS only animates them in. */
+.reveal-pending {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.reveal-pending.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes shimmer {
@@ -121,6 +145,8 @@ html.light {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    background-image: var(--aurora);
+    background-repeat: no-repeat;
   }
 
   h1,
@@ -132,8 +158,8 @@ html.light {
   }
 
   ::selection {
-    background-color: color-mix(in srgb, var(--accent-violet) 40%, transparent);
-    color: var(--text);
+    background-color: color-mix(in srgb, var(--gold) 38%, transparent);
+    color: #131a2a;
   }
 
   :focus-visible {
@@ -157,12 +183,25 @@ html.light {
       scroll-behavior: auto;
     }
 
+    .reveal-pending {
+      opacity: 1;
+      transform: none;
+    }
+
     *,
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .glass {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background-color: var(--raised) !important;
     }
   }
 }
@@ -176,16 +215,44 @@ html.light {
     text-wrap: balance;
   }
 
-  .brand-gradient {
-    background-image: var(--gradient-brand);
+  .glass {
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 1.25rem;
   }
 
-  .surface-glow {
-    background-image: radial-gradient(
-      circle at 15% -10%,
-      color-mix(in srgb, var(--accent-violet) 28%, transparent),
-      transparent 55%
-    );
+  .glass-sm {
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass-sm);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 0.9rem;
+  }
+
+  .glass-lg {
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass-lg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 1.5rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--glass-border);
+    background-color: var(--glass-bg);
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--gold-strong);
   }
 
   .no-scrollbar::-webkit-scrollbar {

@@ -78,7 +78,7 @@ export const LAGOS_RENT_FUND = (() => {
       amountKobo: nairaToKobo(20000),
       type: 'one_off',
       source: 'salary_split',
-      memberColor: '#8B5CF6', // violet
+      memberColor: '#5B6B8C', // steel
       description: 'Owner contribution',
       createdAt: Date.now() - 86400000, // 1 day ago
     },
@@ -89,7 +89,7 @@ export const LAGOS_RENT_FUND = (() => {
       amountKobo: nairaToKobo(30000),
       type: 'one_off',
       source: 'salary_split',
-      memberColor: '#F5B83D', // gold
+      memberColor: '#E3B452', // gold
       description: 'Salary split contribution',
       createdAt: Date.now() - 72000000, // 2 days ago
     },
@@ -100,7 +100,7 @@ export const LAGOS_RENT_FUND = (() => {
       amountKobo: nairaToKobo(25000),
       type: 'one_off',
       source: 'salary_split',
-      memberColor: '#2BD67B', // green
+      memberColor: '#33D17A', // green
       description: 'Salary split contribution',
       createdAt: Date.now() - 48000000, // 3 days ago
     },
@@ -182,7 +182,7 @@ export const ZANZIBAR_TRIP = (() => {
       amountKobo: nairaToKobo(50000),
       type: 'one_off',
       source: 'one_off',
-      memberColor: '#F5B83D', // gold
+      memberColor: '#E3B452', // gold
       description: 'Owner contribution',
       createdAt: Date.now() - 86400000,
     },
@@ -193,7 +193,7 @@ export const ZANZIBAR_TRIP = (() => {
       amountKobo: nairaToKobo(100000),
       type: 'one_off',
       source: 'one_off',
-      memberColor: '#2BD67B', // green
+      memberColor: '#33D17A', // green
       description: 'Contribution',
       createdAt: Date.now() - 86400000,
     },

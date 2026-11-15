@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertCircle, CheckCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle, Info, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+export type ToastType = 'success' | 'error' | 'info'
+
 export interface ToastProps {
-  type: 'success' | 'error' | 'info'
+  type: ToastType
   message: string
   duration?: number
   closable?: boolean
@@ -15,24 +17,28 @@ export interface ToastProps {
 const toastEventName = 'buy-build:toast'
 
 export function ToastViewport() {
-  const [message, setMessage] = useState('')
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null)
 
   useEffect(() => {
     const handleToast = (event: Event) => {
-      const toastEvent = event as CustomEvent<string>
-      setMessage(toastEvent.detail)
+      const detail = (event as CustomEvent<string | { type?: ToastType; message?: string }>).detail
+      if (typeof detail === 'string') {
+        setToast({ type: 'success', message: detail })
+      } else if (detail && typeof detail.message === 'string') {
+        setToast({ type: detail.type ?? 'info', message: detail.message })
+      }
     }
 
     window.addEventListener(toastEventName, handleToast)
     return () => window.removeEventListener(toastEventName, handleToast)
   }, [])
 
-  if (!message) return null
+  if (!toast) return null
   return (
     <Toast
-      type="success"
-      message={message}
-      onDismiss={() => setMessage('')}
+      type={toast.type}
+      message={toast.message}
+      onDismiss={() => setToast(null)}
     />
   )
 }
@@ -52,21 +58,18 @@ export function Toast({
 
   const styles = {
     success: {
-      bg: 'bg-green-growth/10',
-      border: 'border-green-growth',
-      icon: <CheckCircle className="h-4 w-4 text-green-growth" />,
+      container: 'border-[var(--green-growth)] bg-[var(--green-growth)]/10',
+      icon: <CheckCircle className="h-4 w-4 flex-none text-[var(--green-growth)]" aria-hidden="true" />,
       title: 'Success',
     },
     error: {
-      bg: 'bg-alert-coral/10',
-      border: 'border-alert-coral',
-      icon: <AlertCircle className="h-4 w-4 text-alert-coral" />,
+      container: 'border-[var(--alert-coral)] bg-[var(--alert-coral)]/10',
+      icon: <AlertCircle className="h-4 w-4 flex-none text-[var(--alert-coral)]" aria-hidden="true" />,
       title: 'Error',
     },
     info: {
-      bg: 'bg-accent-violet/10',
-      border: 'border-accent-violet',
-      icon: null,
+      container: 'border-[var(--glass-border)] bg-[var(--glass-bg)]',
+      icon: <Info className="h-4 w-4 flex-none text-[var(--gold-strong)]" aria-hidden="true" />,
       title: 'Info',
     },
   }[type]
@@ -77,29 +80,34 @@ export function Toast({
       aria-live="polite"
       aria-atomic="true"
       className={cn(
-        'fixed bottom-4 right-4 z-50 flex max-w-xs items-start gap-3 rounded-lg border p-4 shadow-lg',
-        styles.bg,
-        styles.border,
+        'fixed bottom-20 right-4 z-50 flex max-w-xs items-start gap-3 rounded-2xl border p-4 shadow-[var(--shadow-glass-lg)] backdrop-blur',
+        'left-4 sm:left-auto',
+        'lg:bottom-4',
+        styles.container,
       )}
     >
       {styles.icon}
-      <p className="flex-1 font-medium">{styles.title}: {message}</p>
+      <p className="flex-1 text-sm font-medium text-[var(--text)]">{message}</p>
       {closable && (
         <button
           type="button"
           onClick={onDismiss}
-          className="rounded p-1 transition-colors hover:bg-current/10"
-          aria-label="Dismiss toast"
+          className="flex-none rounded-md p-1 text-[var(--muted)] transition-colors hover:text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
+          aria-label="Dismiss notification"
         >
-          <span aria-hidden="true">×</span>
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       )}
     </div>
   )
 }
 
-export function triggerMoneyConfirmation(message: string) {
+export function triggerToast(message: string, type: ToastType = 'success') {
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent(toastEventName, { detail: message }))
+    window.dispatchEvent(new CustomEvent(toastEventName, { detail: { message, type } }))
   }
+}
+
+export function triggerMoneyConfirmation(message: string) {
+  triggerToast(message, 'success')
 }

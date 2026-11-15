@@ -6,13 +6,11 @@ export interface KoboFallbackProps {
 }
 
 export function KoboFallback({
-  mood = 'idle',
   reducedMotion = false,
 }: KoboFallbackProps) {
   return (
     <div aria-live="polite">
       <KoboProcedural reducedMotion={reducedMotion} />
-      <p className="text-center text-sm text-muted">Kobo in {mood} mood</p>
     </div>
   )
 }

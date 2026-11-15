@@ -96,7 +96,8 @@ export const EmptyState = (props: EmptyStateProps) => {
 
   const illustration = emptyStateIllustrations[type] || emptyStateIllustrations.default
 
-  const hasCta = !!ctaText || onCtaClick
+  // Only render a call-to-action when a handler is wired up — a button with no action is a dead end.
+  const hasCta = Boolean(onCtaClick) && Boolean(ctaText)
 
   const classes = cn(
     'text-center py-12',
@@ -105,13 +106,14 @@ export const EmptyState = (props: EmptyStateProps) => {
 
   const actionItems = showActions && actions
     ? actions.map((action, index) => (
-        <div
+        <button
           key={index}
-          className="p-3 rounded-lg hover:bg-surface/30 transition-colors cursor-pointer"
+          type="button"
           onClick={action.onClick}
+          className="w-full p-3 rounded-lg text-left transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
         >
           <span className="font-medium">{action.label}</span>
-        </div>
+        </button>
       ))
     : []
 
@@ -125,7 +127,7 @@ export const EmptyState = (props: EmptyStateProps) => {
       {hasCta && (
         <button
           onClick={onCtaClick}
-          className="mt-4 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-primary bg-surface hover:bg-surface/30 transition-colors"
+          className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--gold)] px-5 py-2.5 text-sm font-semibold text-[#131A2A] transition-colors hover:bg-[var(--gold-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
         >
           {ctaText}
         </button>

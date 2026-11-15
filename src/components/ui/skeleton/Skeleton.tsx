@@ -2,56 +2,38 @@ import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
- * Skeleton component with states:
- * portrait, paragraph, image, avatar
- * Used for empty states while loading
- * Respects prefers-reduced-motion
+ * Placeholder loading blocks. Reduced motion is handled by the global
+ * prefers-reduced-motion rule in globals.css (animations collapse to 0.01ms).
  */
-export interface SkeletonProps {
-  /** Skeleton type */
-  type: 'portrait' | 'paragraph' | 'image' | 'avatar'
-  /** Width of skeleton */
+export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Skeleton shape preset */
+  type?: 'portrait' | 'paragraph' | 'image' | 'avatar'
+  /** Explicit width (any CSS length, e.g. '12rem' or '50%') */
   width?: string
-  /** Height of skeleton */
+  /** Explicit height (any CSS length) */
   height?: string
-  /** Shimmer animation duration */
-  duration?: number
-  /** Additional className */
+  /** Extra classes */
   className?: string
 }
 
 export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>((props, ref) => {
-  const { type, width, height, duration = 1500, className } = props
-  const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const { type = 'paragraph', width, height, className, style, ...rest } = props
 
-  const baseClasses = cn(
-    'rounded-md animate-pulse',
-    'bg-surface/50',
-  )
-
-  const dimensions = {
-    portrait: width ? `w-${width}` : 'w-16',
-    paragraph: width ? `w-${width}` : 'w-full max-w-md',
-    image: width ? `w-${width}` : 'w-24 h-24',
-    avatar: 'w-12 h-12',
+  const shapeClasses = {
+    portrait: 'h-40 w-32 rounded-2xl',
+    paragraph: 'h-4 w-full max-w-md rounded-md',
+    image: 'h-24 w-24 rounded-xl',
+    avatar: 'h-12 w-12 rounded-full',
   }[type]
-
-  const shimmerDuration = isReduced ? 0 : duration
 
   return (
     <div
       ref={ref}
-      className={cn(
-        baseClasses,
-        dimensions,
-        height && `h-${height}`,
-        className,
-      )}
-      style={{
-        animationDuration: `${shimmerDuration}ms`,
-      }}
-    >
-    </div>
+      aria-hidden="true"
+      className={cn('animate-pulse rounded-md bg-raised/70', shapeClasses, className)}
+      style={{ width, height, ...style }}
+      {...rest}
+    />
   )
 })
 

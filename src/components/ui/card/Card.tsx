@@ -2,48 +2,40 @@ import React, { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
- * Card component with multiple states:
- * default, elevated, with header, with footer, disabled
- * Uses CSS variables for colors (ink, surface, raised, border)
+ * Surface container. Pass `header` / `footer` for structured chrome,
+ * or plain children for a simple padded surface.
  */
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Elevated shadow */
   elevated?: boolean
-  /** With header section */
-  hasHeader?: boolean
-  /** With footer section */
-  hasFooter?: boolean
-  /** Footer content */
-  children: React.ReactNode
-  /** Additional className */
+  /** Optional header content (pre-styled chrome) */
+  header?: React.ReactNode
+  /** Optional footer content (pre-styled chrome) */
+  footer?: React.ReactNode
+  children?: React.ReactNode
   className?: string
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>((props, ref) => {
-  const { elevated = false, hasHeader, hasFooter, className, children, ...rest } = props
-
-  const elevationClasses = {
-    true: 'shadow-lg', // raised token
-    false: 'shadow-sm', // shadow-sm token
-  }
+  const { elevated = false, header, footer, className, children, ...rest } = props
 
   return (
     <div
       ref={ref}
       className={cn(
-        'rounded-md border border-border bg-surface/50 backdrop-blur-sm',
-        elevated && elevationClasses.true,
-        !elevated && elevationClasses.false,
-        'overflow-hidden',
+        'glass overflow-hidden',
+        elevated ? 'shadow-[var(--shadow-glass-lg)]' : undefined,
         className,
       )}
       {...rest}
     >
-      {hasHeader && <div className="p-6 border-b border-border">{children}</div>}
-      {/* Header would be passed separately in practice */}
-      {hasFooter && <div className="p-6 border-t border-border">{children}</div>}
-      {/* Footer would be passed separately in practice */}
-      {!hasHeader && !hasFooter && <div className="p-6">{children}</div>}
+      {header && (
+        <div className="border-b border-[var(--glass-border)] px-6 py-4 font-semibold text-[var(--text)]">{header}</div>
+      )}
+      <div className="p-6">{children}</div>
+      {footer && (
+        <div className="border-t border-[var(--glass-border)] px-6 py-4">{footer}</div>
+      )}
     </div>
   )
 })

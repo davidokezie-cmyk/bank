@@ -1,6 +1,7 @@
 'use client'
 
 import React, { forwardRef } from 'react'
+import { LoaderCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -10,7 +11,7 @@ import { cn } from '@/lib/utils'
  * Reduced motion respected via prefers-reduced-motion
  */
 export interface ButtonProps extends React.ComponentPropsWithoutRef<'button'> {
-  /** Primary (brand violet) or secondary (outline) */
+  /** Primary (solid gold), secondary (glass outline), ghost, or link */
   variant?: 'primary' | 'secondary' | 'ghost' | 'link'
   /** Disabled state */
   disabled?: boolean
@@ -30,10 +31,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) =>
   const { variant = 'primary', disabled, loading, size = 'md', fullWidth, children, className, onClick, ...rest } = props
 
   const variantClasses = {
-    primary: 'bg-accent-violet text-white hover:bg-accent-indigo',
-    secondary: 'border border-border text-surface hover:bg-surface',
-    ghost: 'text-accent-violet hover:bg-transparent',
-    link: 'underline underline-offset-4 hover:text-accent-violet',
+    primary: 'bg-[var(--gold)] text-[#131A2A] hover:bg-[var(--gold-hover)]',
+    secondary: 'glass-sm text-[var(--text)] hover:bg-[var(--glass-highlight)]',
+    ghost: 'text-[var(--gold-strong)] hover:bg-[var(--glass-bg)]',
+    link: 'underline underline-offset-4 decoration-[var(--glass-border)] hover:text-[var(--gold-strong)]',
   }[variant]
 
   const sizeClasses = {
@@ -47,7 +48,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) =>
       ref={ref}
       type="button"
       className={cn(
-        'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-enabled',
+        'inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ink)] disabled:opacity-50 disabled:cursor-not-allowed',
         variantClasses,
         sizeClasses,
         fullWidth && 'w-full',
@@ -61,26 +62,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) =>
       {...rest}
     >
       {loading ? (
-        <span className="flex items-center justify-center h-4 w-4">
-          <svg
-            className="h-4 w-4 animate-spin text-white"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C12 3.34 15.66 4 18 4s6 0.66 6 1c1.34 1.34 1.34 3.55 0 4.23l-7.51 7.51C18 21.66 16.66 22 14 22S6 21.34 6 20z"
-            />
-          </svg>
-        </span>
+        <>
+          <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+          <span className="sr-only">Loading</span>
+        </>
       ) : (
         children
       )}

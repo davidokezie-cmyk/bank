@@ -2,6 +2,8 @@
 
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/motion'
+import { defaultInvites, type DemoInvite } from '@/lib/demo-data'
+import { useDemoStorage } from '@/lib/useDemoStorage'
 import {
   Activity,
   ArrowDownToLine,
@@ -43,6 +45,8 @@ export function BottomNav({ pathname }: { pathname: string }) {
   const reducedMotion = useReducedMotion()
   const [moreOpen, setMoreOpen] = useState(false)
   const activeTab = pathname.split('/')[1] || 'dashboard'
+  const { value: invites } = useDemoStorage<DemoInvite[]>('buy-build:invites', defaultInvites)
+  const pendingInvites = invites.filter((invite) => invite.status === 'pending').length
 
   useEffect(() => {
     if (!moreOpen) return
@@ -57,7 +61,7 @@ export function BottomNav({ pathname }: { pathname: string }) {
     <nav
       data-reduced-motion={reducedMotion}
       aria-label="Mobile navigation"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] bg-[var(--ink)]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--glass-border)] bg-[var(--ink)]/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
     >
       {moreOpen && (
         <>
@@ -71,7 +75,7 @@ export function BottomNav({ pathname }: { pathname: string }) {
             id="mobile-more-menu"
             role="menu"
             aria-label="More destinations"
-            className="absolute bottom-full right-2 mb-2 grid w-64 gap-1 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-2xl"
+            className="absolute bottom-full right-2 mb-2 grid w-64 gap-1 rounded-2xl border border-[var(--glass-border)] bg-[var(--raised)] p-2 shadow-[var(--shadow-glass-lg)]"
           >
             <div className="flex items-center justify-between px-2 pb-1 pt-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">More</p>
@@ -84,18 +88,29 @@ export function BottomNav({ pathname }: { pathname: string }) {
                 <X aria-hidden="true" size={16} />
               </button>
             </div>
-            {moreItems.map(({ href, label, Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                role="menuitem"
-                onClick={() => setMoreOpen(false)}
-                className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text)] transition-colors hover:bg-[var(--raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
-              >
-                <Icon aria-hidden="true" size={17} className="text-[var(--muted)]" />
-                {label}
-              </Link>
-            ))}
+            {moreItems.map(({ href, label, Icon }) => {
+              const showBadge = href === '/invites' && pendingInvites > 0
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  role="menuitem"
+                  onClick={() => setMoreOpen(false)}
+                  className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text)] transition-colors hover:bg-[var(--raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]"
+                >
+                  <Icon aria-hidden="true" size={17} className="text-[var(--muted)]" />
+                  <span className="flex-1">{label}</span>
+                  {showBadge && (
+                    <span
+                      aria-label={`${pendingInvites} pending pot invitation${pendingInvites === 1 ? '' : 's'}`}
+                      className="rounded-full bg-[var(--alert-coral)] px-2 py-0.5 text-[11px] font-semibold text-[#131A2A]"
+                    >
+                      {pendingInvites}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
           </div>
         </>
       )}
@@ -109,7 +124,7 @@ export function BottomNav({ pathname }: { pathname: string }) {
               href={href}
               className={cn(
                 'flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]',
-                active ? 'text-[var(--accent-violet)]' : 'text-[var(--muted)] hover:text-[var(--text)]',
+                active ? 'text-[var(--gold-strong)]' : 'text-[var(--muted)] hover:text-[var(--text)]',
               )}
               aria-current={active ? 'page' : undefined}
             >
@@ -124,9 +139,10 @@ export function BottomNav({ pathname }: { pathname: string }) {
           aria-expanded={moreOpen}
           aria-controls="mobile-more-menu"
           aria-haspopup="menu"
+          aria-label={pendingInvites > 0 ? `More, ${pendingInvites} pending pot invitation${pendingInvites === 1 ? '' : 's'}` : 'More'}
           className={cn(
             'flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]',
-            moreOpen ? 'text-[var(--accent-violet)]' : 'text-[var(--muted)] hover:text-[var(--text)]',
+            moreOpen ? 'text-[var(--gold-strong)]' : 'text-[var(--muted)] hover:text-[var(--text)]',
           )}
         >
           <span className="relative grid place-items-center">
@@ -135,7 +151,14 @@ export function BottomNav({ pathname }: { pathname: string }) {
               <span className="h-0.5 w-3.5 rounded-full bg-current" />
               <span className="h-0.5 w-3.5 rounded-full bg-current" />
             </span>
-            <span className="absolute -right-1.5 -top-1 h-1.5 w-1.5 rounded-full bg-[var(--alert-coral)]" aria-hidden="true" />
+            {pendingInvites > 0 && (
+              <span
+                className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--alert-coral)] px-1 text-[9px] font-bold text-[#131A2A]"
+                aria-hidden="true"
+              >
+                {pendingInvites}
+              </span>
+            )}
           </span>
           <span>More</span>
         </button>

@@ -18,14 +18,14 @@ export default function KoboPreviewPage() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold)]">Developer preview</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--gold-strong)]">Developer preview</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">Kobo mascot</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
             Moods, progress blocks, and the procedural fallback. This page works with no Bforartists install and no GLB
             assets present.
           </p>
         </div>
-        <Link href="/dashboard" className="text-sm font-semibold text-[var(--accent-violet)] hover:underline">
+        <Link href="/dashboard" className="text-sm font-semibold text-[var(--gold-strong)] hover:underline">
           Back to app
         </Link>
       </header>

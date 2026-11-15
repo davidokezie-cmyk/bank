@@ -91,9 +91,10 @@ docs/  docs/planning/  docs/reference/
 
 ## Design direction
 **Mood:** premium, warm, confident — a lifestyle brand that happens to do money, not a bank. Dark mode primary; light mode supported.
-**Palette (CSS variables / Tailwind tokens):** ink `#0B0A14` → surface `#14122A` → raised `#1C1938`; brand violet→indigo gradient for primary actions and hero glow; gold `#F5B83D` for coins, rewards, "Build" moments; Naira green `#2BD67B` for growth; coral `#FF6B6B` for alerts; text `#F4F3FF`, muted `#A5A3C4`.
+**Visual language:** refined glass on deep navy — frosted panels, 1px translucent borders, layered depth shadows. No gradients on interactive elements, no neon glows, no purple/violet anywhere.
+**Palette (CSS variables / Tailwind tokens):** ink `#0A0E1A` → surface `#101623` → raised `#182031`; glass borders `rgba(232,236,243,0.10)`; text soft white `#E8ECF3`, muted `#8A94A8`; gold `#E3B452` (primary CTA fill with ink text; rewards, "Build" moments); Naira green `#33D17A` for growth; coral `#E0605F` for alerts. See `docs/planning/04-DESIGN-BRIEF.md` for the full token set and glass rules.
 **Type:** one distinctive display face (e.g. Sora or Bricolage Grotesque via `next/font`) + Inter/Geist for UI. Tabular numerals for all money.
-**Don'ts:** no generic purple-card-grid SaaS look, no emoji as icons, no lorem ipsum, and do NOT copy NovaPay's layout, colours, copy, or character.
+**Don'ts:** no generic purple-card-grid SaaS look, no emoji as icons, no lorem ipsum, and do NOT copy NovaPay's layout, colours, copy, or character. No purple/violet/magenta anywhere in the UI; no gradient text; primary actions are solid gold with ink text.
 **Motion language (defined once in `lib/motion.ts`):** springs (stiffness ~260, damping ~24); 150–250 ms micro-interactions; 400–600 ms page/section moves. Money moments (send, save, allocate, contribute) get a satisfying coin/progress animation plus text confirmation.
 
 ## Mascot — "Kobo" (original character, built with Bforartists)

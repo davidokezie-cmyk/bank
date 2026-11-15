@@ -61,20 +61,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, forwardedR
   }
 
   const baseClasses = cn(
-    'w-full rounded-md border border-border bg-transparent px-3 py-2 text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-    disabled && 'opacity-50 cursor-not-allowed',
-    money && 'font-numeric',
+    'w-full rounded-xl border border-[var(--border)] bg-[var(--ink)] px-3 py-3 text-[var(--text)] transition-colors placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] disabled:opacity-50 disabled:cursor-not-allowed',
+    errorMessage && 'border-[var(--alert-coral)]',
+    money && 'font-numeric tabular-nums',
     className,
   )
 
   const inputClasses = cn(
-    'peer placeholder:text-muted/40 disabled:cursor-not-placeholder',
+    'peer',
     {
-      'bg-surface/50': !disabled,
-      'border-border': true,
-      'focus:ring-accent-violet': isFocused || focused,
+      'focus:ring-[var(--ring)]': isFocused || focused,
     },
   )
+
+  const errorId = errorMessage ? `${inputId}-error` : undefined
+  const describedByIds = [describedBy, errorId].filter(Boolean).join(' ') || undefined
 
   return (
     <div className="space-y-1">
@@ -82,8 +83,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, forwardedR
         <label
           htmlFor={inputId}
           className={cn(
-            'block text-sm font-medium text-primary hover:text-accent-violet',
-            isFocused && 'text-accent-violet',
+            'block text-sm font-medium text-[var(--text)] transition-colors',
+            isFocused && 'text-[var(--gold-strong)]',
           )}
         >
           {label}
@@ -101,7 +102,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, forwardedR
         onFocus={handleFocus}
         onBlur={handleBlur}
         disabled={disabled}
-        aria-describedby={describedBy}
+        aria-describedby={describedByIds}
+        aria-invalid={errorMessage ? true : undefined}
         {...rest}
       />
 
@@ -109,11 +111,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, forwardedR
         <p
           role="alert"
           aria-live="polite"
-          className={cn(
-            'text-alert-coral text-xs mt-1',
-            isFocused && 'text-alert-coral',
-          )}
-          id={describedBy || undefined}
+          className="mt-1 text-xs text-[var(--alert-coral)]"
+          id={errorId}
         >
           {errorMessage}
         </p>

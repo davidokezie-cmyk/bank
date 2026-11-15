@@ -42,18 +42,18 @@ export type KobaMood = 'idle' | 'wave' | 'celebrate' | 'thinking'
 
 // Valid member colors for joint pot block towers
 export const MEMBER_COLORS = [
-  '#8B5CF6', // violet
-  '#F5B83D', // gold
-  '#2BD67B', // naira green
-  '#F87171', // coral
-  '#A5A3C4', // muted
+  '#5B6B8C', // steel
+  '#E3B452', // gold
+  '#33D17A', // naira green
+  '#E0605F', // coral
+  '#8A94A8', // muted
 ] as const
 
 // Block colors per member (for joint pot visualisation)
 export const BLOCK_COLORS_PER_MEMBER = [
-  '#F5B83D', // gold - member 1
-  '#2BD67B', // green - member 2
-  '#8B5CF6', // violet - member 3
-  '#F87171', // coral - member 4
-  '#EC4899', // pink - member 5
+  '#E3B452', // gold - member 1
+  '#33D17A', // green - member 2
+  '#5B6B8C', // steel - member 3
+  '#E0605F', // coral - member 4
+  '#C98A2B', // sand - member 5
 ] as const
